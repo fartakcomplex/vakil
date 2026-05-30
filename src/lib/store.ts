@@ -86,6 +86,7 @@ interface PersistedState {
   token: string | null;
   theme: 'light' | 'dark';
   language: 'fa' | 'en';
+  currentPage: string;
 }
 
 const INITIAL_STATE = {
@@ -133,6 +134,7 @@ export const useAppStore = create<AppState>()(
           isAuthenticated: true,
           currentUser: user,
           token,
+          currentPage: 'dashboard',
         }),
 
       logout: () =>
@@ -205,7 +207,8 @@ export const useAppStore = create<AppState>()(
         token: state.token,
         theme: state.theme,
         language: state.language,
-      }),
+        currentPage: state.currentPage,
+        }),
     },
   ),
 );
