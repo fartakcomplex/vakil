@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback } from 'react';
 import { useAppStore } from '@/lib/store';
+import type { User, LegalCase, Appointment, Invoice, Payment, Task, Notification, Post, Document, Course, Message, Lead, CalendarEvent, TimeEntry } from '@/lib/types';
 import AppShell from '@/components/app-shell';
 import LoginPage from '@/components/pages/login-page';
 import RegisterPage from '@/components/pages/register-page';
@@ -110,30 +111,49 @@ export default function Home() {
     // Fetch all in parallel
     const results = await Promise.allSettled(API_ENDPOINTS.map((url) => fetchWithAuth(url)));
 
+    // Helper: extract the array data from API response objects like { cases: [...], pagination: {...} }
+    const extractArray = (res: unknown): unknown[] => {
+      if (Array.isArray(res)) return res;
+      if (res && typeof res === 'object' && !Array.isArray(res)) {
+        const obj = res as Record<string, unknown>;
+        // Try known keys first (most common API response keys)
+        const knownKeys = ['data', 'cases', 'messages', 'invoices', 'appointments', 'tasks', 'notifications', 'posts', 'documents', 'courses', 'leads', 'calendarEvents', 'events', 'timeEntries', 'users', 'payments'];
+        for (const key of knownKeys) {
+          if (Array.isArray(obj[key])) return obj[key] as unknown[];
+        }
+        // Fallback: find any key that has an array value (skip 'pagination')
+        for (const key of Object.keys(obj)) {
+          if (key !== 'pagination' && key !== 'unreadCount' && Array.isArray(obj[key])) return obj[key] as unknown[];
+        }
+      }
+      return [];
+    };
+
     results.forEach((result, idx) => {
       if (result.status === 'fulfilled' && result.value) {
         const endpoint = API_ENDPOINTS[idx];
-        const data = Array.isArray(result.value) ? result.value : result.value.data ? result.value.data : [];
+        const raw = result.value;
 
         if (endpoint.includes('/auth/me')) {
-          // Update current user if returned
-          if (result.value && !Array.isArray(result.value)) {
-            useAppStore.setState({ currentUser: result.value });
+          // Update current user if returned (may be wrapped in { user: ... })
+          if (raw && !Array.isArray(raw)) {
+            const user = (raw as Record<string, unknown>).user || raw;
+            useAppStore.setState({ currentUser: user as User });
           }
-        } else if (endpoint.includes('/cases')) setCases(data);
-        else if (endpoint.includes('/appointments')) setAppointments(data);
-        else if (endpoint.includes('/invoices')) setInvoices(data);
-        else if (endpoint.includes('/tasks')) setTasks(data);
-        else if (endpoint.includes('/notifications')) setNotifications(data);
-        else if (endpoint.includes('/posts')) setPosts(data);
-        else if (endpoint.includes('/documents')) setDocuments(data);
-        else if (endpoint.includes('/courses')) setCourses(data);
-        else if (endpoint.includes('/messages')) setMessages(data);
-        else if (endpoint.includes('/leads')) setLeads(data);
-        else if (endpoint.includes('/calendar')) setCalendarEvents(data);
-        else if (endpoint.includes('/time-entries')) setTimeEntries(data);
-        else if (endpoint.includes('/users')) setUsers(data);
-        else if (endpoint.includes('/payments')) setPayments(data);
+        } else if (endpoint.includes('/cases')) setCases(extractArray(raw) as LegalCase[]);
+        else if (endpoint.includes('/appointments')) setAppointments(extractArray(raw) as Appointment[]);
+        else if (endpoint.includes('/invoices')) setInvoices(extractArray(raw) as Invoice[]);
+        else if (endpoint.includes('/tasks')) setTasks(extractArray(raw) as Task[]);
+        else if (endpoint.includes('/notifications')) setNotifications(extractArray(raw) as Notification[]);
+        else if (endpoint.includes('/posts')) setPosts(extractArray(raw) as Post[]);
+        else if (endpoint.includes('/documents')) setDocuments(extractArray(raw) as Document[]);
+        else if (endpoint.includes('/courses')) setCourses(extractArray(raw) as Course[]);
+        else if (endpoint.includes('/messages')) setMessages(extractArray(raw) as Message[]);
+        else if (endpoint.includes('/leads')) setLeads(extractArray(raw) as Lead[]);
+        else if (endpoint.includes('/calendar')) setCalendarEvents(extractArray(raw) as CalendarEvent[]);
+        else if (endpoint.includes('/time-entries')) setTimeEntries(extractArray(raw) as TimeEntry[]);
+        else if (endpoint.includes('/users')) setUsers(extractArray(raw) as User[]);
+        else if (endpoint.includes('/payments')) setPayments(extractArray(raw) as Payment[]);
       }
     });
   }, []);
