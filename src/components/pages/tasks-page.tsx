@@ -6,15 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAppStore } from '@/lib/store';
 import { t } from '@/lib/persian';
 import { formatDate, getPriorityColor, toPersianNumber } from '@/lib/utils-helpers';
-import { CheckSquare, Plus, Circle, Loader, Ban, AlertCircle } from 'lucide-react';
+import { CheckSquare, Plus, Circle, Loader, Ban, AlertCircle, Loader2, Check, ListTodo, Briefcase, Users } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import type { TaskStatus, CasePriority } from '@/lib/types';
 
 const COLUMNS: { status: TaskStatus; label: string; icon: typeof Circle; color: string }[] = [
@@ -27,7 +29,10 @@ const COLUMNS: { status: TaskStatus; label: string; icon: typeof Circle; color: 
 export default function TasksPage() {
   const { tasks, setTasks, users, cases } = useAppStore();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({ title: '', description: '', priority: 'MEDIUM' as CasePriority, dueDate: '', assignedTo: '', caseId: '' });
+  const { toast } = useToast();
 
   const grouped = useMemo(() => {
     const map: Record<string, typeof tasks> = {};
@@ -37,6 +42,12 @@ export default function TasksPage() {
   }, [tasks]);
 
   const handleCreate = async () => {
+    const newErrors: Record<string, string> = {};
+    if (!form.title.trim()) newErrors.title = 'عنوان تسک الزامی است';
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+
+    setLoading(true);
+    setErrors({});
     try {
       const res = await fetch('/api/tasks', {
         method: 'POST',
@@ -45,44 +56,114 @@ export default function TasksPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setTasks([data.data, ...tasks]);
+        setTasks([data.data || data, ...tasks]);
         setDialogOpen(false);
+        setForm({ title: '', description: '', priority: 'MEDIUM', dueDate: '', assignedTo: '', caseId: '' });
+        toast({ title: 'تسک جدید ثبت شد', description: 'تسک با موفقیت ایجاد شد', variant: 'default' });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        toast({ title: 'خطا', description: err.error || 'خطا در ثبت تسک', variant: 'destructive' });
       }
-    } catch { /* ignore */ }
+    } catch {
+      toast({ title: 'خطا', description: 'خطا در ارتباط با سرور', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{t('tasks.title')}</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
+        <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
+          <SheetTrigger asChild>
             <Button className="bg-emerald-600 hover:bg-emerald-700 text-white"><Plus className="w-4 h-4 ml-1" />{t('tasks.new')}</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>{t('tasks.new')}</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div className="space-y-1"><Label className="text-xs">عنوان</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-              <div className="space-y-1"><Label className="text-xs">توضیحات</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1"><Label className="text-xs">اولویت</Label>
-                  <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v as CasePriority })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{(['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as CasePriority[]).map((p) => <SelectItem key={p} value={p}>{t(`priority.${p}`)}</SelectItem>)}</SelectContent>
+          </SheetTrigger>
+          <SheetContent side="left" className="sm:max-w-[550px] overflow-y-auto">
+            <div className="bg-gradient-to-l from-emerald-600 to-emerald-700 -mx-6 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-b-xl">
+              <SheetHeader>
+                <SheetTitle className="text-white flex items-center gap-2">
+                  <ListTodo className="w-5 h-5" />
+                  ثبت تسک جدید
+                </SheetTitle>
+              </SheetHeader>
+              <p className="text-emerald-100 text-xs mt-1">جزئیات تسک را مشخص کنید</p>
+            </div>
+
+            <div className="space-y-6 px-1">
+              {/* Section 1: Basic Info */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <ListTodo className="w-4 h-4" />
+                  اطلاعات اصلی
+                </div>
+                <Separator />
+                <div className="space-y-1">
+                  <Label className="text-xs">عنوان <span className="text-red-500">*</span></Label>
+                  <Input value={form.title} onChange={(e) => { setForm({ ...form, title: e.target.value }); if (errors.title) setErrors({ ...errors, title: '' }); }} placeholder="عنوان تسک را وارد کنید" className={errors.title ? 'border-red-500' : ''} />
+                  {errors.title && <p className="text-xs text-red-500">{errors.title}</p>}
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">توضیحات</Label>
+                  <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} placeholder="توضیحات تکمیلی تسک..." />
+                </div>
+              </div>
+
+              {/* Section 2: Settings */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <Briefcase className="w-4 h-4" />
+                  تنظیمات
+                </div>
+                <Separator />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">اولویت</Label>
+                    <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v as CasePriority })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{(['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as CasePriority[]).map((p) => <SelectItem key={p} value={p}>{t(`priority.${p}`)}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">مهلت</Label>
+                    <Input type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Assignment */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <Users className="w-4 h-4" />
+                  تخصیص
+                </div>
+                <Separator />
+                <div className="space-y-1">
+                  <Label className="text-xs">پرونده</Label>
+                  <Select value={form.caseId} onValueChange={(v) => setForm({ ...form, caseId: v })}>
+                    <SelectTrigger><SelectValue placeholder="انتخاب پرونده (اختیاری)" /></SelectTrigger>
+                    <SelectContent>{cases.map((c) => <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1"><Label className="text-xs">مهلت</Label><Input type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} /></div>
+                <div className="space-y-1">
+                  <Label className="text-xs">اختصاص به</Label>
+                  <Select value={form.assignedTo} onValueChange={(v) => setForm({ ...form, assignedTo: v })}>
+                    <SelectTrigger><SelectValue placeholder="انتخاب فرد" /></SelectTrigger>
+                    <SelectContent>{users.map((u) => <SelectItem key={u.id} value={u.id}>{u.firstName} {u.lastName}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="space-y-1"><Label className="text-xs">اختصاص به</Label>
-                <Select value={form.assignedTo} onValueChange={(v) => setForm({ ...form, assignedTo: v })}>
-                  <SelectTrigger><SelectValue placeholder="انتخاب" /></SelectTrigger>
-                  <SelectContent>{users.map((u) => <SelectItem key={u.id} value={u.id}>{u.firstName} {u.lastName}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <Button onClick={handleCreate} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">{t('common.save')}</Button>
+
+              <Button onClick={handleCreate} disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11">
+                {loading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin ml-2" />در حال ثبت...</>
+                ) : (
+                  <><Check className="w-4 h-4 ml-2" />ثبت تسک</>
+                )}
+              </Button>
             </div>
-          </DialogContent>
-        </Dialog>
+          </SheetContent>
+        </Sheet>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

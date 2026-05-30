@@ -5,15 +5,17 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppStore } from '@/lib/store';
 import { t } from '@/lib/persian';
 import { toPersianNumber, formatDate } from '@/lib/utils-helpers';
-import { ChevronRight, ChevronLeft, Plus, Calendar, Clock, MapPin, Gavel } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Plus, Calendar, Clock, MapPin, Gavel, Loader2, Check, CalendarPlus, FileText } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const WEEKDAYS = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
 const MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
@@ -28,7 +30,10 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({ title: '', date: '', startTime: '', endTime: '', type: 'MEETING', description: '' });
+  const { toast } = useToast();
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -64,7 +69,13 @@ export default function CalendarPage() {
   const selectedEvents = selectedDate ? (eventsByDate[selectedDate] || []) : [];
 
   const handleCreate = async () => {
-    if (!form.title || !form.date) return;
+    const newErrors: Record<string, string> = {};
+    if (!form.title.trim()) newErrors.title = 'عنوان رویداد الزامی است';
+    if (!form.date) newErrors.date = 'تاریخ رویداد الزامی است';
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+
+    setLoading(true);
+    setErrors({});
     try {
       const res = await fetch('/api/calendar', {
         method: 'POST',
@@ -73,10 +84,19 @@ export default function CalendarPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setCalendarEvents([data.data, ...calendarEvents]);
+        setCalendarEvents([data.data || data, ...calendarEvents]);
         setDialogOpen(false);
+        setForm({ title: '', date: '', startTime: '', endTime: '', type: 'MEETING', description: '' });
+        toast({ title: 'رویداد جدید ثبت شد', description: 'رویداد با موفقیت ایجاد شد', variant: 'default' });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        toast({ title: 'خطا', description: err.error || 'خطا در ثبت رویداد', variant: 'destructive' });
       }
-    } catch { /* ignore */ }
+    } catch {
+      toast({ title: 'خطا', description: 'خطا در ارتباط با سرور', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
@@ -88,29 +108,90 @@ export default function CalendarPage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{t('calendar.title')}</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
+        <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
+          <SheetTrigger asChild>
             <Button className="bg-emerald-600 hover:bg-emerald-700 text-white"><Plus className="w-4 h-4 ml-1" />{t('calendar.newEvent')}</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>{t('calendar.newEvent')}</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div className="space-y-1"><Label className="text-xs">عنوان</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-              <div className="space-y-1"><Label className="text-xs">نوع</Label>
-                <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{['MEETING', 'DEADLINE', 'HEARING', 'TASK', 'REMINDER'].map((tp) => <SelectItem key={tp} value={tp}>{t(`calendar.${tp.toLowerCase()}`)}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1"><Label className="text-xs">تاریخ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
-                <div className="space-y-1"><Label className="text-xs">ساعت</Label><Input type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} /></div>
-              </div>
-              <div className="space-y-1"><Label className="text-xs">توضیحات</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
-              <Button onClick={handleCreate} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">{t('common.save')}</Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="sm:max-w-[550px] overflow-y-auto">
+            <div className="bg-gradient-to-l from-emerald-600 to-emerald-700 -mx-6 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-b-xl">
+              <SheetHeader>
+                <SheetTitle className="text-white flex items-center gap-2">
+                  <CalendarPlus className="w-5 h-5" />
+                  ثبت رویداد جدید
+                </SheetTitle>
+              </SheetHeader>
+              <p className="text-emerald-100 text-xs mt-1">اطلاعات رویداد را وارد کنید</p>
             </div>
-          </DialogContent>
-        </Dialog>
+
+            <div className="space-y-6 px-1">
+              {/* Section 1: Basic Info */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <FileText className="w-4 h-4" />
+                  اطلاعات رویداد
+                </div>
+                <Separator />
+                <div className="space-y-1">
+                  <Label className="text-xs">عنوان <span className="text-red-500">*</span></Label>
+                  <Input value={form.title} onChange={(e) => { setForm({ ...form, title: e.target.value }); if (errors.title) setErrors({ ...errors, title: '' }); }} placeholder="عنوان رویداد" className={errors.title ? 'border-red-500' : ''} />
+                  {errors.title && <p className="text-xs text-red-500">{errors.title}</p>}
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">نوع</Label>
+                  <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{['MEETING', 'DEADLINE', 'HEARING', 'TASK', 'REMINDER'].map((tp) => <SelectItem key={tp} value={tp}>{t(`calendar.${tp.toLowerCase()}`)}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Section 2: Date & Time */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <Clock className="w-4 h-4" />
+                  زمان
+                </div>
+                <Separator />
+                <div className="space-y-1">
+                  <Label className="text-xs">تاریخ <span className="text-red-500">*</span></Label>
+                  <Input type="date" value={form.date} onChange={(e) => { setForm({ ...form, date: e.target.value }); if (errors.date) setErrors({ ...errors, date: '' }); }} className={errors.date ? 'border-red-500' : ''} />
+                  {errors.date && <p className="text-xs text-red-500">{errors.date}</p>}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">ساعت شروع</Label>
+                    <Input type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">ساعت پایان</Label>
+                    <Input type="time" value={form.endTime} onChange={(e) => setForm({ ...form, endTime: e.target.value })} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Description */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <FileText className="w-4 h-4" />
+                  توضیحات
+                </div>
+                <Separator />
+                <div className="space-y-1">
+                  <Label className="text-xs">توضیحات</Label>
+                  <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} placeholder="توضیحات رویداد..." />
+                </div>
+              </div>
+
+              <Button onClick={handleCreate} disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11">
+                {loading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin ml-2" />در حال ثبت...</>
+                ) : (
+                  <><Check className="w-4 h-4 ml-2" />ثبت رویداد</>
+                )}
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
@@ -151,7 +232,7 @@ export default function CalendarPage() {
               selectedEvents.length > 0 ? selectedEvents.map((e) => (
                 <div key={e.id} className="p-3 rounded-lg border space-y-1">
                   <div className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full ${typeColors[e.type]?.replace('bg-', 'bg-') || ''}`} /><span className="text-sm font-medium">{e.title}</span></div>
-                  {e.startTime && <p className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{e.startTime}</p>}
+                  {e.startTime && <p className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{e.startTime}{e.endTime ? ` - ${e.endTime}` : ''}</p>}
                   {e.description && <p className="text-xs text-muted-foreground">{e.description}</p>}
                 </div>
               )) : <p className="text-sm text-muted-foreground text-center py-4">رویدادی وجود ندارد</p>

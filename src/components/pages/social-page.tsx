@@ -8,22 +8,25 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAppStore } from '@/lib/store';
 import { t } from '@/lib/persian';
 import { getInitials, getRelativeTime } from '@/lib/utils-helpers';
-import { Plus, Heart, MessageCircle, Pin, BookOpen, HelpCircle, Megaphone } from 'lucide-react';
+import { Plus, Heart, MessageCircle, Pin, BookOpen, HelpCircle, Megaphone, Loader2, Check, PenSquare, Tag } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import type { PostType } from '@/lib/types';
 
 export default function SocialPage() {
   const { posts, setPosts, currentUser } = useAppStore();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ title: '', content: '', type: 'DISCUSSION' as PostType });
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [form, setForm] = useState({ title: '', content: '', type: 'DISCUSSION' as PostType, tags: '' });
   const [commentText, setCommentText] = useState('');
+  const { toast } = useToast();
 
   const sorted = useMemo(() => [...posts].sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
@@ -50,45 +53,116 @@ export default function SocialPage() {
   };
 
   const handleCreate = async () => {
-    if (!form.content.trim()) return;
+    const newErrors: Record<string, string> = {};
+    if (!form.content.trim()) newErrors.content = 'محتوای پست الزامی است';
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+
+    setLoading(true);
+    setErrors({});
     try {
       const res = await fetch('/api/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${useAppStore.getState().token}` },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
+        }),
       });
       if (res.ok) {
         const data = await res.json();
-        setPosts([data.data, ...posts]);
+        setPosts([data.data || data, ...posts]);
         setDialogOpen(false);
-        setForm({ title: '', content: '', type: 'DISCUSSION' });
+        setForm({ title: '', content: '', type: 'DISCUSSION', tags: '' });
+        toast({ title: 'پست جدید ثبت شد', description: 'پست با موفقیت ایجاد شد', variant: 'default' });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        toast({ title: 'خطا', description: err.error || 'خطا در ثبت پست', variant: 'destructive' });
       }
-    } catch { /* ignore */ }
+    } catch {
+      toast({ title: 'خطا', description: 'خطا در ارتباط با سرور', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{t('social.title')}</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
+        <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
+          <SheetTrigger asChild>
             <Button className="bg-emerald-600 hover:bg-emerald-700 text-white"><Plus className="w-4 h-4 ml-1" />{t('social.newPost')}</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>{t('social.newPost')}</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div className="space-y-1"><Label className="text-xs">نوع</Label>
-                <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as PostType })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{(['DISCUSSION', 'ARTICLE', 'QUESTION', 'ANNOUNCEMENT'] as PostType[]).map((pt) => <SelectItem key={pt} value={pt}>{t(`social.${pt.toLowerCase()}`)}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1"><Label className="text-xs">عنوان</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-              <div className="space-y-1"><Label className="text-xs">محتوا</Label><Textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={4} /></div>
-              <Button onClick={handleCreate} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">{t('common.save')}</Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="sm:max-w-[550px] overflow-y-auto">
+            <div className="bg-gradient-to-l from-emerald-600 to-emerald-700 -mx-6 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-b-xl">
+              <SheetHeader>
+                <SheetTitle className="text-white flex items-center gap-2">
+                  <PenSquare className="w-5 h-5" />
+                  ایجاد پست جدید
+                </SheetTitle>
+              </SheetHeader>
+              <p className="text-emerald-100 text-xs mt-1">نظر یا سؤال خود را با تیم به اشتراک بگذارید</p>
             </div>
-          </DialogContent>
-        </Dialog>
+
+            <div className="space-y-6 px-1">
+              {/* Section 1: Post Info */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <PenSquare className="w-4 h-4" />
+                  اطلاعات پست
+                </div>
+                <Separator />
+                <div className="space-y-1">
+                  <Label className="text-xs">نوع</Label>
+                  <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as PostType })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{(['DISCUSSION', 'ARTICLE', 'QUESTION', 'ANNOUNCEMENT'] as PostType[]).map((pt) => <SelectItem key={pt} value={pt}>{t(`social.${pt.toLowerCase()}`)}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">عنوان</Label>
+                  <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="عنوان پست (اختیاری)" />
+                </div>
+              </div>
+
+              {/* Section 2: Content */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <MessageCircle className="w-4 h-4" />
+                  محتوا
+                </div>
+                <Separator />
+                <div className="space-y-1">
+                  <Label className="text-xs">محتوا <span className="text-red-500">*</span></Label>
+                  <Textarea value={form.content} onChange={(e) => { setForm({ ...form, content: e.target.value }); if (errors.content) setErrors({ ...errors, content: '' }); }} rows={5} placeholder="متن پست خود را بنویسید..." className={errors.content ? 'border-red-500' : ''} />
+                  {errors.content && <p className="text-xs text-red-500">{errors.content}</p>}
+                </div>
+              </div>
+
+              {/* Section 3: Tags */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <Tag className="w-4 h-4" />
+                  برچسب‌ها
+                </div>
+                <Separator />
+                <div className="space-y-1">
+                  <Label className="text-xs">برچسب‌ها</Label>
+                  <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} placeholder="حقوقی، قرارداد، مشاوره" />
+                  <p className="text-[11px] text-muted-foreground">برچسب‌ها را با کاما جدا کنید</p>
+                </div>
+              </div>
+
+              <Button onClick={handleCreate} disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11">
+                {loading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin ml-2" />در حال ثبت...</>
+                ) : (
+                  <><Check className="w-4 h-4 ml-2" />ثبت پست</>
+                )}
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       <div className="space-y-4 max-w-2xl mx-auto">

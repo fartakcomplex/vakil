@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -22,8 +23,9 @@ import {
   Briefcase, Plus, Search, LayoutGrid, List, ArrowLeft, FileText, MessageSquare, Clock,
   CalendarDays, StickyNote, Gavel, ChevronLeft, MoreHorizontal, Upload, X,
   FileCheck, AlertTriangle, CheckCircle2, Circle, Timer, User, Building, Scale,
-  ChevronDown, Filter, Users,
+  ChevronDown, Filter, Users, Loader2, Check,
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import type { CaseStatus, CasePriority, CaseType } from '@/lib/types';
 
 const containerVariants = {
@@ -82,7 +84,16 @@ export default function CasesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [newNote, setNewNote] = useState({ title: '', content: '' });
-  const [newCase, setNewCase] = useState({ title: '', type: 'civil' as CaseType, priority: 'MEDIUM' as CasePriority, description: '', clientId: '' });
+  const [newCase, setNewCase] = useState({
+    title: '', type: 'civil' as CaseType, priority: 'MEDIUM' as CasePriority,
+    description: '', clientId: '', summary: '',
+    court: '', courtBranch: '', judgeName: '',
+    filingDate: '', nextHearing: '',
+    lawyerId: '', internId: '', tags: '',
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const filtered = useMemo(() => {
     return cases.filter((c) => {
@@ -96,6 +107,8 @@ export default function CasesPage() {
 
   const selected = cases.find((c) => c.id === selectedCase);
   const clients = users.filter((u) => u.role === 'CLIENT');
+  const lawyers = users.filter((u) => u.role === 'LAWYER');
+  const interns = users.filter((u) => u.role === 'INTERN');
 
   // Case count by status
   const caseCounts = useMemo(() => {
@@ -113,19 +126,39 @@ export default function CasesPage() {
   }, [selected]);
 
   const handleCreate = async () => {
+    const newErrors: Record<string, string> = {};
+    if (!newCase.title.trim()) newErrors.title = 'عنوان پرونده الزامی است';
+    if (!newCase.clientId) newErrors.clientId = 'انتخاب موکل الزامی است';
+    if (!newCase.description.trim()) newErrors.description = 'توضیحات پرونده الزامی است';
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+
+    setLoading(true);
+    setErrors({});
     try {
       const res = await fetch('/api/cases', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${useAppStore.getState().token}` },
-        body: JSON.stringify(newCase),
+        body: JSON.stringify({
+          ...newCase,
+          tags: newCase.tags ? newCase.tags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
+        }),
       });
       if (res.ok) {
         const data = await res.json();
-        setCases([data.data, ...cases]);
+        setCases([data.case || data.data || data, ...cases]);
         setDialogOpen(false);
-        setNewCase({ title: '', type: 'civil', priority: 'MEDIUM', description: '', clientId: '' });
+        setNewCase({ title: '', type: 'civil', priority: 'MEDIUM', description: '', clientId: '', summary: '', court: '', courtBranch: '', judgeName: '', filingDate: '', nextHearing: '', lawyerId: '', internId: '', tags: '' });
+        setErrors({});
+        toast({ title: 'پرونده جدید ثبت شد', description: 'پرونده با موفقیت ایجاد شد', variant: 'default' });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        toast({ title: 'خطا', description: err.error || 'خطا در ثبت پرونده', variant: 'destructive' });
       }
-    } catch { /* ignore */ }
+    } catch {
+      toast({ title: 'خطا', description: 'خطا در ارتباط با سرور', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleStatusChange = (newStatus: CaseStatus) => {
@@ -486,37 +519,154 @@ export default function CasesPage() {
           </h1>
           <p className="text-sm text-muted-foreground mt-1">{toPersianNumber(cases.length)} پرونده</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1"><Plus className="w-4 h-4" />{t('cases.new')}</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>{t('cases.new')}</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div className="space-y-1"><Label className="text-xs">{t('cases.title')}</Label><Input value={newCase.title} onChange={(e) => setNewCase({ ...newCase, title: e.target.value })} /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1"><Label className="text-xs">{t('cases.type')}</Label>
-                  <Select value={newCase.type} onValueChange={(v) => setNewCase({ ...newCase, type: v as CaseType })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{(['civil', 'criminal', 'family', 'corporate', 'labor', 'tax'] as CaseType[]).map((ct) => <SelectItem key={ct} value={ct}>{getCaseTypeName(ct)}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1"><Label className="text-xs">{t('cases.priority')}</Label>
-                  <Select value={newCase.priority} onValueChange={(v) => setNewCase({ ...newCase, priority: v as CasePriority })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{(['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as CasePriority[]).map((p) => <SelectItem key={p} value={p}>{t(`priority.${p}`)}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-1"><Label className="text-xs">{t('cases.client')}</Label>
-                <Select value={newCase.clientId} onValueChange={(v) => setNewCase({ ...newCase, clientId: v })}>
-                  <SelectTrigger><SelectValue placeholder="انتخاب موکل" /></SelectTrigger>
-                  <SelectContent>{clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1"><Label className="text-xs">{t('cases.description')}</Label><Textarea value={newCase.description} onChange={(e) => setNewCase({ ...newCase, description: e.target.value })} rows={3} /></div>
-              <Button onClick={handleCreate} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">{t('common.save')}</Button>
+        <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
+          <SheetTrigger asChild>
+            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1">
+              <Plus className="w-4 h-4" />{t('cases.new')}
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="sm:max-w-[550px] overflow-y-auto">
+            <div className="bg-gradient-to-l from-emerald-600 to-emerald-700 -mx-6 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-b-xl">
+              <SheetHeader>
+                <SheetTitle className="text-white flex items-center gap-2">
+                  <Briefcase className="w-5 h-5" />
+                  ثبت پرونده جدید
+                </SheetTitle>
+              </SheetHeader>
+              <p className="text-emerald-100 text-xs mt-1">اطلاعات پرونده را با دقت وارد کنید</p>
             </div>
-          </DialogContent>
-        </Dialog>
+
+            <div className="space-y-6 px-1">
+              {/* Section 1: Basic Info */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <FileText className="w-4 h-4" />
+                  اطلاعات اصلی
+                </div>
+                <Separator />
+                <div className="space-y-1">
+                  <Label className="text-xs">عنوان پرونده <span className="text-red-500">*</span></Label>
+                  <Input value={newCase.title} onChange={(e) => { setNewCase({ ...newCase, title: e.target.value }); if (errors.title) setErrors({ ...errors, title: '' }); }} placeholder="مثلاً: دعوای ملکی شماره ۲۳۴۵" className={errors.title ? 'border-red-500' : ''} />
+                  {errors.title && <p className="text-xs text-red-500">{errors.title}</p>}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">نوع پرونده <span className="text-red-500">*</span></Label>
+                    <Select value={newCase.type} onValueChange={(v) => setNewCase({ ...newCase, type: v as CaseType })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{(['civil', 'criminal', 'family', 'corporate', 'labor', 'tax'] as CaseType[]).map((ct) => <SelectItem key={ct} value={ct}>{getCaseTypeName(ct)}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">اولویت</Label>
+                    <Select value={newCase.priority} onValueChange={(v) => setNewCase({ ...newCase, priority: v as CasePriority })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{(['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as CasePriority[]).map((p) => <SelectItem key={p} value={p}>{t(`priority.${p}`)}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">خلاصه پرونده</Label>
+                  <p className="text-[11px] text-muted-foreground">خلاصه‌ای کوتاه از موضوع پرونده</p>
+                  <Textarea value={newCase.summary} onChange={(e) => setNewCase({ ...newCase, summary: e.target.value })} rows={2} placeholder="خلاصه‌ای از موضوع پرونده..." />
+                </div>
+              </div>
+
+              {/* Section 2: Court Info */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <Gavel className="w-4 h-4" />
+                  اطلاعات دادگاه
+                </div>
+                <Separator />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">دادگاه</Label>
+                    <Input value={newCase.court} onChange={(e) => setNewCase({ ...newCase, court: e.target.value })} placeholder="مثلاً: دادگاه عمومی تهران" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">شعبه</Label>
+                    <Input value={newCase.courtBranch} onChange={(e) => setNewCase({ ...newCase, courtBranch: e.target.value })} placeholder="مثلاً: شعبه ۱۲" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">نام قاضی</Label>
+                  <Input value={newCase.judgeName} onChange={(e) => setNewCase({ ...newCase, judgeName: e.target.value })} placeholder="نام قاضی رسیدگی‌کننده" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">تاریخ ثبت دادخواست</Label>
+                    <Input type="date" value={newCase.filingDate} onChange={(e) => setNewCase({ ...newCase, filingDate: e.target.value })} />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">جلسه بعدی</Label>
+                    <Input type="date" value={newCase.nextHearing} onChange={(e) => setNewCase({ ...newCase, nextHearing: e.target.value })} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Case Parties */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <Users className="w-4 h-4" />
+                  اطراف پرونده
+                </div>
+                <Separator />
+                <div className="space-y-1">
+                  <Label className="text-xs">موکل <span className="text-red-500">*</span></Label>
+                  <Select value={newCase.clientId} onValueChange={(v) => { setNewCase({ ...newCase, clientId: v }); if (errors.clientId) setErrors({ ...errors, clientId: '' }); }}>
+                    <SelectTrigger className={errors.clientId ? 'border-red-500' : ''}><SelectValue placeholder="انتخاب موکل" /></SelectTrigger>
+                    <SelectContent>{clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>)}</SelectContent>
+                  </Select>
+                  {errors.clientId && <p className="text-xs text-red-500">{errors.clientId}</p>}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">وکیل</Label>
+                    <Select value={newCase.lawyerId} onValueChange={(v) => setNewCase({ ...newCase, lawyerId: v })}>
+                      <SelectTrigger><SelectValue placeholder="انتخاب وکیل" /></SelectTrigger>
+                      <SelectContent>{lawyers.map((l) => <SelectItem key={l.id} value={l.id}>{l.firstName} {l.lastName}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">کارآموز</Label>
+                    <Select value={newCase.internId} onValueChange={(v) => setNewCase({ ...newCase, internId: v })}>
+                      <SelectTrigger><SelectValue placeholder="انتخاب کارآموز" /></SelectTrigger>
+                      <SelectContent>{interns.map((i) => <SelectItem key={i.id} value={i.id}>{i.firstName} {i.lastName}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 4: Description */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <StickyNote className="w-4 h-4" />
+                  توضیحات
+                </div>
+                <Separator />
+                <div className="space-y-1">
+                  <Label className="text-xs">توضیحات پرونده <span className="text-red-500">*</span></Label>
+                  <Textarea value={newCase.description} onChange={(e) => { setNewCase({ ...newCase, description: e.target.value }); if (errors.description) setErrors({ ...errors, description: '' }); }} rows={3} placeholder="شرح دقیق پرونده و جزئیات مربوطه" className={errors.description ? 'border-red-500' : ''} />
+                  {errors.description && <p className="text-xs text-red-500">{errors.description}</p>}
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">برچسب‌ها</Label>
+                  <Input value={newCase.tags} onChange={(e) => setNewCase({ ...newCase, tags: e.target.value })} placeholder="ملکی، قرارداد، الزامی" />
+                  <p className="text-[11px] text-muted-foreground">برچسب‌ها را با کاما جدا کنید</p>
+                </div>
+              </div>
+
+              <Button onClick={handleCreate} disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11">
+                {loading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin ml-2" />در حال ثبت...</>
+                ) : (
+                  <><Check className="w-4 h-4 ml-2" />ثبت پرونده</>
+                )}
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       {/* Status Summary */}

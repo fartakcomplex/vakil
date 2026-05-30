@@ -6,13 +6,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { useAppStore } from '@/lib/store';
 import { t } from '@/lib/persian';
 import { formatDate, formatFileSize } from '@/lib/utils-helpers';
-import { FileText, Plus, Search, Download, Trash2, File, Image as ImageIcon, FileSpreadsheet, Video, Archive } from 'lucide-react';
+import { FileText, Plus, Search, Download, Trash2, File, Image as ImageIcon, FileSpreadsheet, Video, Archive, Upload, FolderOpen, Loader2, Check } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const fileIcon = (mimeType: string) => {
   if (!mimeType) return <File className="w-4 h-4" />;
@@ -37,6 +39,11 @@ export default function DocumentsPage() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [category, setCategory] = useState('legal');
+  const [caseId, setCaseId] = useState('');
+  const { toast } = useToast();
+
+  const cases = useAppStore((s) => s.cases);
 
   const filtered = useMemo(() => {
     return documents.filter((d) => {
@@ -46,34 +53,78 @@ export default function DocumentsPage() {
     });
   }, [documents, search, categoryFilter]);
 
-  const handleUpload = async () => {
+  const handleUpload = () => {
     setDialogOpen(false);
+    toast({ title: 'آماده بارگذاری', description: 'قابلیت بارگذاری فایل به‌زودی فعال می‌شود', variant: 'default' });
+    setCategory('legal');
+    setCaseId('');
   };
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h1 className="text-xl font-bold">{t('documents.title')}</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
+        <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
+          <SheetTrigger asChild>
             <Button className="bg-emerald-600 hover:bg-emerald-700 text-white"><Plus className="w-4 h-4 ml-1" />{t('documents.new')}</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>{t('documents.new')}</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div className="space-y-1"><Label className="text-xs">دسته‌بندی</Label>
-                <Select value="legal" onValueChange={() => {}}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{['legal', 'contract', 'financial', 'template', 'report', 'other'].map((c) => <SelectItem key={c} value={c}>{t(`docCategory.${c}`)}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="border-2 border-dashed rounded-lg p-8 text-center text-muted-foreground text-sm cursor-pointer hover:border-emerald-500 transition-colors">
-                فایل را اینجا رها کنید یا کلیک کنید
-              </div>
-              <Button onClick={handleUpload} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">{t('common.upload')}</Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="sm:max-w-[550px] overflow-y-auto">
+            <div className="bg-gradient-to-l from-emerald-600 to-emerald-700 -mx-6 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-b-xl">
+              <SheetHeader>
+                <SheetTitle className="text-white flex items-center gap-2">
+                  <Upload className="w-5 h-5" />
+                  بارگذاری سند جدید
+                </SheetTitle>
+              </SheetHeader>
+              <p className="text-emerald-100 text-xs mt-1">فایل مورد نظر را انتخاب کنید</p>
             </div>
-          </DialogContent>
-        </Dialog>
+
+            <div className="space-y-6 px-1">
+              {/* Section 1: File Selection */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <FileText className="w-4 h-4" />
+                  انتخاب فایل
+                </div>
+                <Separator />
+                <div className="border-2 border-dashed rounded-xl p-8 text-center hover:border-emerald-500 transition-colors cursor-pointer">
+                  <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm font-medium">فایل را اینجا رها کنید</p>
+                  <p className="text-xs text-muted-foreground mt-1">یا کلیک کنید برای انتخاب فایل</p>
+                  <p className="text-[10px] text-muted-foreground mt-3">فرمت‌های مجاز: PDF, Word, Excel, Image (حداکثر ۵۰ مگابایت)</p>
+                </div>
+              </div>
+
+              {/* Section 2: Details */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <FolderOpen className="w-4 h-4" />
+                  جزئیات
+                </div>
+                <Separator />
+                <div className="space-y-1">
+                  <Label className="text-xs">دسته‌بندی</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{['legal', 'contract', 'financial', 'template', 'report', 'other'].map((c) => <SelectItem key={c} value={c}>{t(`docCategory.${c}`)}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">پرونده (اختیاری)</Label>
+                  <Select value={caseId} onValueChange={setCaseId}>
+                    <SelectTrigger><SelectValue placeholder="انتخاب پرونده" /></SelectTrigger>
+                    <SelectContent>{cases.map((c) => <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <p className="text-[11px] text-muted-foreground">سند به پرونده مشخص‌شده متصل خواهد شد</p>
+                </div>
+              </div>
+
+              <Button onClick={handleUpload} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11">
+                <><Upload className="w-4 h-4 ml-2" />بارگذاری سند</>
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
