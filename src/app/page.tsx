@@ -199,7 +199,7 @@ export default function Home() {
             const email = state.currentUser.email;
             // Default password used by seed data
             const reloggedIn = await tryRelogin(email, '123456');
-            if (!relogged) {
+            if (!reloggedIn) {
               // Cannot re-login — clear auth state so user sees login page
               useAppStore.getState().logout();
             }

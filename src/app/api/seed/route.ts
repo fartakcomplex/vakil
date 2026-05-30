@@ -17,8 +17,8 @@ export async function POST() {
     const hashedPassword = await hashPassword('123456');
 
     // Speed up SQLite by disabling sync for bulk inserts
-    await db.$executeRaw`PRAGMA synchronous = OFF`);
-    await db.$executeRaw`PRAGMA journal_mode = WAL`;
+    await db.$executeRawUnsafe('PRAGMA synchronous = OFF');
+    await db.$executeRawUnsafe('PRAGMA journal_mode = WAL');
 
 
     // ============ CREATE USERS ============
