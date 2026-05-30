@@ -107,7 +107,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const { currentUser, theme, toggleTheme, logout, sidebarOpen, toggleSidebar, setSidebarOpen, notifications, setPage, language } = useAppStore();
+  const { currentPage, currentUser, theme, toggleTheme, logout, sidebarOpen, toggleSidebar, setSidebarOpen, notifications, setPage, language } = useAppStore();
   const [searchOpen, setSearchOpen] = useState(false);
   const lang = 'fa';
 
