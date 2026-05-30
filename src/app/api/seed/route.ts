@@ -1,47 +1,25 @@
 import { NextResponse } from 'next/server';
+
+// Allow up to 5 minutes for the seed to complete
+export const maxDuration = 300;
 import { db } from '@/lib/db';
 import { hashPassword, generateToken } from '@/lib/auth';
 
 export async function POST() {
   try {
-    // Clean up existing data (reverse order of dependencies)
-    await db.payment.deleteMany();
-    await db.walletTransaction.deleteMany();
-    await db.installment.deleteMany();
-    await db.invoice.deleteMany();
-    await db.calendarEvent.deleteMany();
-    await db.timeEntry.deleteMany();
-    await db.lead.deleteMany();
-    await db.message.deleteMany();
-    await db.comment.deleteMany();
-    await db.post.deleteMany();
-    await db.enrollment.deleteMany();
-    await db.examResult.deleteMany();
-    await db.exam.deleteMany();
-    await db.lesson.deleteMany();
-    await db.course.deleteMany();
-    await db.notification.deleteMany();
-    await db.document.deleteMany();
-    await db.activity.deleteMany();
-    await db.task.deleteMany();
-    await db.caseDeadline.deleteMany();
-    await db.hearing.deleteMany();
-    await db.caseNote.deleteMany();
-    await db.caseComment.deleteMany();
-    await db.caseTimeline.deleteMany();
-    await db.caseDocument.deleteMany();
-    await db.appointment.deleteMany();
-    await db.legalCase.deleteMany();
-    // NOTE: session and device are transient - do NOT clear them during seeding
-    await db.auditLog.deleteMany();
-    await db.internProfile.deleteMany();
-    await db.accountantProfile.deleteMany();
-    await db.clientProfile.deleteMany();
-    await db.lawyerProfile.deleteMany();
-    await db.setting.deleteMany();
-    await db.user.deleteMany();
+    // IDEMPOTENT CHECK: If users already exist, return early without touching anything.
+    // This prevents deleting users (and cascading sessions) on every page load.
+    const userCount = await db.user.count();
+    if (userCount > 0) {
+      return NextResponse.json({ message: 'Database already seeded', seeded: false });
+    }
 
     const hashedPassword = await hashPassword('123456');
+
+    // Speed up SQLite by disabling sync for bulk inserts
+    await db.$executeRaw`PRAGMA synchronous = OFF`);
+    await db.$executeRaw`PRAGMA journal_mode = WAL`;
+
 
     // ============ CREATE USERS ============
 
@@ -2282,6 +2260,7 @@ export async function POST() {
 
     return NextResponse.json({
       success: true,
+      seeded: true,
       message: 'داده‌های نمونه با موفقیت ایجاد شدند',
       counts: {
         users: 14,

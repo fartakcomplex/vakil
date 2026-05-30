@@ -43,7 +43,6 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           user: { select: { id: true, firstName: true, lastName: true, avatar: true } },
-          case: { select: { id: true, title: true, caseNumber: true } },
         },
         orderBy: { date: 'desc' },
         skip: (page - 1) * limit,
@@ -103,7 +102,6 @@ export async function POST(request: NextRequest) {
       },
       include: {
         user: { select: { id: true, firstName: true, lastName: true } },
-        case: { select: { id: true, title: true, caseNumber: true } },
       },
     });
 

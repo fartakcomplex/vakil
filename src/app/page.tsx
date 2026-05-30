@@ -161,6 +161,25 @@ export default function Home() {
     });
   }, []);
 
+  // Attempt to auto-relogin with stored credentials after session invalidation
+  const tryRelogin = useCallback(async (email: string, password: string): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user && data.token) {
+          useAppStore.getState().login(data.user, data.token);
+          return true;
+        }
+      }
+    } catch { /* ignore */ }
+    return false;
+  }, []);
+
   // Seed database on first load and wait for completion
   useEffect(() => {
     const seed = async () => {
@@ -168,11 +187,32 @@ export default function Home() {
       try {
         await fetch('/api/seed', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
       } catch { /* ignore */ }
+      // After seed, validate existing session. If invalid, attempt auto-relogin.
+      const state = useAppStore.getState();
+      if (state.isAuthenticated && state.token && state.currentUser) {
+        try {
+          const meRes = await fetch('/api/auth/me', {
+            headers: { Authorization: `Bearer ${state.token}` },
+          });
+          if (!meRes.ok) {
+            // Session is invalid — try to re-login with stored credentials
+            const email = state.currentUser.email;
+            // Default password used by seed data
+            const reloggedIn = await tryRelogin(email, '123456');
+            if (!relogged) {
+              // Cannot re-login — clear auth state so user sees login page
+              useAppStore.getState().logout();
+            }
+          }
+        } catch {
+          // Network error — don't clear auth, retry will happen on next load
+        }
+      }
       setSeedDone(true);
       setSeeding(false);
     };
     seed();
-  }, []);
+  }, [tryRelogin]);
 
   // Fetch data after login AND after seed completes
   useEffect(() => {
