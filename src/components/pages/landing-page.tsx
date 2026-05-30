@@ -256,7 +256,7 @@ function InfiniteMarquee({ items, speed = 30 }: { items: string[]; speed?: numbe
 // ============ GRADIENT TEXT ============
 function GradientText({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <span className={`bg-clip-text text-transparent bg-gradient-to-l from-emerald-300 via-teal-200 to-cyan-300 ${className}`}>
+    <span className={`bg-clip-text text-transparent bg-gradient-to-l from-emerald-300 via-teal-200 to-cyan-300 ${className}`} style={{ fontFamily: "'Lalezar', sans-serif" }}>
       {children}
     </span>
   );
@@ -443,7 +443,7 @@ function StatCard({ value, suffix, label, icon: Icon }: { value: number; suffix:
   const { count, ref } = useCounter(value);
   return (
     <div ref={ref} className="text-center group">
-      <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm mb-4 group-hover:bg-white/20 transition-colors group-hover:scale-110 transition-transform">
+      <div className="relative inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-white/10 backdrop-blur-sm mb-4 group-hover:bg-white/20 transition-colors group-hover:scale-110 transition-transform">
         <Icon className="w-7 h-7 text-white" />
         <motion.div
           className="absolute inset-0 rounded-2xl border-2 border-white/20"
@@ -451,7 +451,7 @@ function StatCard({ value, suffix, label, icon: Icon }: { value: number; suffix:
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         />
       </div>
-      <div className="text-3xl sm:text-4xl font-extrabold text-white mb-1">
+      <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-1">
         {count.toLocaleString('fa-IR')}
         <span className="text-emerald-300">{suffix}</span>
       </div>
@@ -703,7 +703,7 @@ export default function LandingPage() {
               </motion.div>
 
               {/* Main heading */}
-              <motion.h1 variants={fadeInUp} className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6 tracking-tight">
+              <motion.h1 variants={fadeInUp} className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-white leading-snug sm:leading-tight mb-6 tracking-tight" style={{ fontFamily: "'Lalezar', sans-serif" }}>
                 راهکار حقوقی هوشمند
                 <br />
                 <GradientText>برای هر مسئله‌ای</GradientText>
@@ -716,12 +716,12 @@ export default function LandingPage() {
               </motion.p>
 
               {/* CTA Buttons */}
-              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                <GlowButton variant="primary" onClick={() => scrollToSection('contact-form')}>
+              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12">
+                <GlowButton variant="primary" className="w-full sm:w-auto" onClick={() => scrollToSection('contact-form')}>
                   <PhoneCall className="w-5 h-5" />
                   مشاوره رایگان ۱۵ دقیقه‌ای
                 </GlowButton>
-                <GlowButton variant="outline" onClick={() => scrollToSection('services')}>
+                <GlowButton variant="outline" className="w-full sm:w-auto" onClick={() => scrollToSection('services')}>
                   <Play className="w-4 h-4" />
                   مشاهده خدمات
                 </GlowButton>
@@ -742,7 +742,7 @@ export default function LandingPage() {
                     transition={{ type: 'spring', stiffness: 300 }}
                   >
                     <badge.icon className={`w-4 h-4 ${badge.color}`} />
-                    <span className="text-white/70 text-sm">{badge.label}</span>
+                    <span className="text-white/70 text-xs sm:text-sm">{badge.label}</span>
                   </motion.div>
                 ))}
               </motion.div>
@@ -760,7 +760,7 @@ export default function LandingPage() {
       </div>
 
       {/* ============ CONSULTATION TYPES ============ */}
-      <section id="services" className="py-20 sm:py-28 bg-background relative overflow-hidden">
+      <section id="services" className="py-14 sm:py-20 lg:py-28 bg-background relative overflow-hidden">
         {/* Subtle background decoration */}
         <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-500/[0.03] rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-500/[0.03] rounded-full blur-3xl" />
@@ -771,7 +771,7 @@ export default function LandingPage() {
               <Sparkles className="w-4 h-4" />
               خدمات مشاوره
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4" style={{ fontFamily: "'Lalezar', sans-serif" }}>
               نوع مشاوره خود را انتخاب کنید
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
@@ -797,7 +797,7 @@ export default function LandingPage() {
                   {/* Top accent line */}
                   <div className={`absolute top-0 right-0 left-0 h-1 bg-gradient-to-l ${item.color} transition-all duration-300 ${selectedConsult === i ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
 
-                  <CardContent className="p-6">
+                  <CardContent className="p-5 sm:p-6">
                     {/* Icon */}
                     <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                       <item.icon className="w-7 h-7 text-white" />
@@ -842,14 +842,14 @@ export default function LandingPage() {
       </section>
 
       {/* ============ BENTO GRID - WHY US ============ */}
-      <section className="py-20 sm:py-28 bg-secondary/20 relative overflow-hidden">
+      <section className="py-14 sm:py-20 lg:py-28 bg-secondary/20 relative overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-medium mb-4">
               <Crown className="w-4 h-4" />
               چرا لِگال‌هاب؟
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4" style={{ fontFamily: "'Lalezar', sans-serif" }}>
               مزیت‌هایی که ما را متمایز می‌کند
             </h2>
           </AnimatedSection>
@@ -926,7 +926,7 @@ export default function LandingPage() {
       </section>
 
       {/* ============ FEATURED LAWYERS SECTION ============ */}
-      <section id="lawyers" className="py-20 sm:py-28 bg-background relative overflow-hidden">
+      <section id="lawyers" className="py-14 sm:py-20 lg:py-28 bg-background relative overflow-hidden">
         <div className="absolute top-1/2 left-0 w-72 h-72 bg-emerald-500/[0.04] rounded-full blur-3xl -translate-y-1/2" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection className="text-center mb-16">
@@ -934,7 +934,7 @@ export default function LandingPage() {
               <BadgeCheck className="w-4 h-4" />
               تیم وکلای ما
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4" style={{ fontFamily: "'Lalezar', sans-serif" }}>
               وکلای برتر، نتایج استثنایی
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
@@ -997,7 +997,7 @@ export default function LandingPage() {
 
           {/* Practice areas quick scroll */}
           <AnimatedSection delay={0.2} className="mt-16">
-            <h3 className="text-center text-lg font-semibold text-foreground mb-6">حوزه‌های تخصصی حقوقی</h3>
+            <h3 className="text-center text-lg font-semibold text-foreground mb-6" style={{ fontFamily: "'Lalezar', sans-serif" }}>حوزه‌های تخصصی حقوقی</h3>
             <div className="flex flex-wrap justify-center gap-3">
               {practiceAreas.map((area, i) => (
                 <motion.div
@@ -1026,14 +1026,14 @@ export default function LandingPage() {
       </section>
 
       {/* ============ HOW IT WORKS ============ */}
-      <section id="how-it-works" className="py-20 sm:py-28 bg-secondary/20 relative overflow-hidden">
+      <section id="how-it-works" className="py-14 sm:py-20 lg:py-28 bg-secondary/20 relative overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-medium mb-4">
               <Timer className="w-4 h-4" />
               نحوه کار
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4" style={{ fontFamily: "'Lalezar', sans-serif" }}>
               در سه مرحله مشاوره بگیرید
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
@@ -1094,11 +1094,11 @@ export default function LandingPage() {
                         whileHover={{ scale: 1.08 }}
                         transition={{ type: 'spring', stiffness: 300 }}
                       >
-                        <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-xl`}>
+                        <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-xl`}>
                           <item.icon className="w-9 h-9 text-white" />
                         </div>
-                        <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-background border-2 border-primary flex items-center justify-center shadow-lg">
-                          <span className="text-sm font-extrabold text-primary">{item.step}</span>
+                        <div className="absolute -top-3 -right-3 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-background border-2 border-primary flex items-center justify-center shadow-lg">
+                          <span className="text-xs sm:text-sm font-extrabold text-primary">{item.step}</span>
                         </div>
                         {/* Pulse ring */}
                         <motion.div
@@ -1119,14 +1119,14 @@ export default function LandingPage() {
       </section>
 
       {/* ============ STATISTICS ============ */}
-      <section className="py-20 sm:py-28 bg-gradient-to-br from-slate-950 via-emerald-950 to-teal-950 relative overflow-hidden">
+      <section className="py-14 sm:py-20 lg:py-28 bg-gradient-to-br from-slate-950 via-emerald-950 to-teal-950 relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-10 right-10 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl" />
           <div className="absolute bottom-10 left-10 w-80 h-80 rounded-full bg-teal-500/10 blur-3xl" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-3">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-3" style={{ fontFamily: "'Lalezar', sans-serif" }}>
               اعداد، حرف می‌زنند
             </h2>
             <p className="text-white/50 text-base sm:text-lg">اعتماد هزاران مشتری در سراسر ایران</p>
@@ -1141,14 +1141,14 @@ export default function LandingPage() {
       </section>
 
       {/* ============ TESTIMONIALS ============ */}
-      <section id="testimonials" className="py-20 sm:py-28 bg-background relative overflow-hidden">
+      <section id="testimonials" className="py-14 sm:py-20 lg:py-28 bg-background relative overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-medium mb-4">
               <MessageSquare className="w-4 h-4" />
               نظرات مشتریان
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4" style={{ fontFamily: "'Lalezar', sans-serif" }}>
               رضایت مشتریان، افتخار ماست
             </h2>
           </AnimatedSection>
@@ -1158,7 +1158,7 @@ export default function LandingPage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: '-60px' }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
           >
             {testimonials.map((t, i) => (
               <motion.div key={i} variants={fadeInUp}>
@@ -1202,14 +1202,14 @@ export default function LandingPage() {
       </section>
 
       {/* ============ FAQ SECTION ============ */}
-      <section id="faq" className="py-20 sm:py-28 bg-secondary/20">
+      <section id="faq" className="py-14 sm:py-20 lg:py-28 bg-secondary/20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-medium mb-4">
               <MessageCircle className="w-4 h-4" />
               سوالات متداول
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground" style={{ fontFamily: "'Lalezar', sans-serif" }}>
               پاسخ سوالات شما
             </h2>
           </AnimatedSection>
@@ -1236,7 +1236,7 @@ export default function LandingPage() {
       </section>
 
       {/* ============ CONSULTATION FORM ============ */}
-      <section id="contact-form" className="py-20 sm:py-28 bg-background relative overflow-hidden">
+      <section id="contact-form" className="py-14 sm:py-20 lg:py-28 bg-background relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/[0.04] rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-teal-500/[0.04] rounded-full blur-3xl" />
@@ -1247,7 +1247,7 @@ export default function LandingPage() {
               <Send className="w-4 h-4" />
               درخواست مشاوره
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4" style={{ fontFamily: "'Lalezar', sans-serif" }}>
               همین الان شروع کنید
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg">
@@ -1265,24 +1265,24 @@ export default function LandingPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="form-name">نام و نام خانوادگی *</Label>
-                      <Input id="form-name" name="name" placeholder="مثال: علی محمدی" value={formData.name} onChange={handleFormChange} required className="h-11" />
+                      <Input id="form-name" name="name" placeholder="مثال: علی محمدی" value={formData.name} onChange={handleFormChange} required className="h-12 sm:h-11" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="form-phone">شماره تلفن *</Label>
-                      <Input id="form-phone" name="phone" type="tel" placeholder="۰۹۱۲۳۴۵۶۷۸۹" value={formData.phone} onChange={handleFormChange} required className="h-11" />
+                      <Input id="form-phone" name="phone" type="tel" placeholder="۰۹۱۲۳۴۵۶۷۸۹" value={formData.phone} onChange={handleFormChange} required className="h-12 sm:h-11" />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="form-email">ایمیل</Label>
-                    <Input id="form-email" name="email" type="email" placeholder="example@email.com" value={formData.email} onChange={handleFormChange} dir="ltr" className="h-11" />
+                    <Input id="form-email" name="email" type="email" placeholder="example@email.com" value={formData.email} onChange={handleFormChange} dir="ltr" className="h-12 sm:h-11" />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>نوع مشاوره</Label>
                       <Select value={formData.consultationType} onValueChange={(v) => setFormData((p) => ({ ...p, consultationType: v }))}>
-                        <SelectTrigger className="w-full h-11"><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
+                        <SelectTrigger className="w-full h-12 sm:h-11"><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
                         <SelectContent>
                           {consultTypes.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                         </SelectContent>
@@ -1291,7 +1291,7 @@ export default function LandingPage() {
                     <div className="space-y-2">
                       <Label>حوزه حقوقی</Label>
                       <Select value={formData.legalArea} onValueChange={(v) => setFormData((p) => ({ ...p, legalArea: v }))}>
-                        <SelectTrigger className="w-full h-11"><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
+                        <SelectTrigger className="w-full h-12 sm:h-11"><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
                         <SelectContent>
                           {legalAreas.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
                         </SelectContent>
@@ -1339,7 +1339,7 @@ export default function LandingPage() {
       </section>
 
       {/* ============ FINAL CTA ============ */}
-      <section className="py-20 sm:py-28 bg-gradient-to-br from-slate-950 via-emerald-950 to-teal-950 relative overflow-hidden">
+      <section className="py-14 sm:py-20 lg:py-28 bg-gradient-to-br from-slate-950 via-emerald-950 to-teal-950 relative overflow-hidden">
         <div className="absolute inset-0">
           <motion.div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
@@ -1351,7 +1351,7 @@ export default function LandingPage() {
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <AnimatedSection>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6" style={{ fontFamily: "'Lalezar', sans-serif" }}>
               آماده حل مسئله حقوقی
               <br />
               <GradientText>خود هستید؟</GradientText>
@@ -1360,12 +1360,12 @@ export default function LandingPage() {
               همین الان ثبت‌نام کنید و اولین مشاوره رایگان ۱۵ دقیقه‌ای خود را دریافت کنید.
               تیم وکلای متخصص ما آماده خدمت‌رسانی به شماست.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <GlowButton variant="primary" onClick={() => scrollToSection('contact-form')}>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <GlowButton variant="primary" className="w-full sm:w-auto" onClick={() => scrollToSection('contact-form')}>
                 <PhoneCall className="w-5 h-5" />
                 شروع مشاوره رایگان
               </GlowButton>
-              <GlowButton variant="outline" onClick={() => setPage('register')}>
+              <GlowButton variant="outline" className="w-full sm:w-auto" onClick={() => setPage('register')}>
                 <UserPlus className="w-5 h-5" />
                 ثبت‌نام در سایت
               </GlowButton>
@@ -1377,7 +1377,7 @@ export default function LandingPage() {
       {/* ============ FOOTER ============ */}
       <footer className="bg-slate-950 border-t border-white/10 py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
             {/* Brand */}
             <div className="lg:col-span-1">
               <div className="flex items-center gap-2.5 mb-4">
@@ -1516,7 +1516,7 @@ export default function LandingPage() {
       {/* ============ FLOATING PHONE BUTTON ============ */}
       <motion.a
         href="tel:+982112345678"
-        className="fixed bottom-20 sm:bottom-24 left-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-xl shadow-emerald-500/30 text-white"
+        className="fixed bottom-20 sm:bottom-24 left-6 z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-xl shadow-emerald-500/30 text-white"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         animate={{ boxShadow: ['0 0 0 0 rgba(16,185,129,0.4)', '0 0 0 12px rgba(16,185,129,0)', '0 0 0 0 rgba(16,185,129,0.4)'] }}
