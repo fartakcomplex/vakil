@@ -1,0 +1,718 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============ ENUMS (simulated with String) ============
+
+// ============ USER & AUTH ============
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  phone         String?
+  nationalCode  String?
+  firstName     String
+  lastName      String
+  avatar        String?
+  role          String    @default("CLIENT") // SUPER_ADMIN, COMPLEX_MANAGER, LAWYER, INTERN, CLIENT, ACCOUNTANT, SUPPORT
+  isActive      Boolean   @default(true)
+  isVerified    Boolean   @default(false)
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret String?
+  lastLogin     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  lawyerProfile       LawyerProfile?
+  clientProfile       ClientProfile?
+  accountantProfile   AccountantProfile?
+  internProfile       InternProfile?
+  cases_asLawyer      LegalCase[]      @relation("CaseLawyer")
+  cases_asClient      LegalCase[]      @relation("CaseClient")
+  cases_asIntern      LegalCase[]      @relation("CaseIntern")
+  assignedTasks       Task[]
+  auditLogs           AuditLog[]
+  notifications       Notification[]
+  appointments_lawyer Appointment[]    @relation("AppointmentLawyer")
+  appointments_client Appointment[]    @relation("AppointmentClient")
+  payments            Payment[]
+  messages_sent        Message[]        @relation("MessageSender")
+  messages_received    Message[]        @relation("MessageReceiver")
+  posts               Post[]
+  comments            Comment[]
+  courseEnrollments   Enrollment[]
+  documents           Document[]
+  activities          Activity[]
+  sessions            Session[]
+  devices             Device[]
+  invoices_created    Invoice[]       @relation("InvoiceCreator")
+  invoices_client     Invoice[]       @relation("InvoiceClient")
+  walletTransactions  WalletTransaction[]
+  timeEntries         TimeEntry[]
+  calendarEvents      CalendarEvent[]
+  leads               Lead[]
+  supervisedInterns   InternProfile[]  @relation("InternSupervisor")
+
+  @@index([email])
+  @@index([role])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model Device {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String?
+  type      String?  // mobile, desktop, tablet
+  ipAddress String?
+  userAgent String?
+  isCurrent Boolean  @default(false)
+  lastUsed  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  entity    String?
+  entityId  String?
+  details   String?  // JSON
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ============ PROFILES ============
+
+model LawyerProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  licenseNumber String?
+  specialization String?
+  bio           String?
+  experience    Int      @default(0)
+  rating        Float    @default(0)
+  hourlyRate    Float?
+  isAvailable   Boolean  @default(true)
+  barAdmission  String?
+  education     String?
+  languages     String?  // JSON array
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([specialization])
+}
+
+model ClientProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  company     String?
+  address     String?
+  city        String?
+  province    String?
+  postalCode  String?
+  occupation  String?
+  referredBy  String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AccountantProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  license     String?
+  department  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model InternProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  university     String?
+  field          String?
+  supervisorId   String?
+  startDate      DateTime
+  endDate        DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  supervisor User? @relation("InternSupervisor", fields: [supervisorId], references: [id])
+}
+
+// ============ CASE MANAGEMENT ============
+
+model LegalCase {
+  id            String   @id @default(cuid())
+  title         String
+  caseNumber     String   @unique
+  type          String   // civil, criminal, family, corporate, labor, tax, ip, immigration
+  status        String   @default("OPEN") // OPEN, IN_PROGRESS, PENDING, CLOSED, ARCHIVED
+  priority      String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  description   String
+  summary       String?
+  court         String?
+  courtBranch   String?
+  judgeName     String?
+  filingDate    DateTime?
+  nextHearing   DateTime?
+  closedAt      DateTime?
+  closedReason  String?
+  tags          String?  // JSON array
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  lawyerId      String?
+  internId      String?
+  clientId      String
+
+  lawyer        User?    @relation("CaseLawyer", fields: [lawyerId], references: [id])
+  intern        User?    @relation("CaseIntern", fields: [internId], references: [id])
+  client        User     @relation("CaseClient", fields: [clientId], references: [id])
+  documents     CaseDocument[]
+  timeline      CaseTimeline[]
+  comments      CaseComment[]
+  notes         CaseNote[]
+  hearings     Hearing[]
+  deadlines    CaseDeadline[]
+  invoices     Invoice[]
+  activities   Activity[]
+
+  @@index([status])
+  @@index([type])
+  @@index([lawyerId])
+  @@index([clientId])
+  @@index([caseNumber])
+}
+
+model CaseDocument {
+  id        String   @id @default(cuid())
+  caseId    String
+  name      String
+  type      String   // contract, evidence, correspondence, brief, motion, complaint
+  filePath  String
+  fileSize  Int
+  mimeType  String?
+  uploadedBy String
+  tags      String?  // JSON
+  createdAt DateTime @default(now())
+
+  case LegalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([type])
+}
+
+model CaseTimeline {
+  id          String   @id @default(cuid())
+  caseId      String
+  title       String
+  description String?
+  type        String   // status_change, hearing, filing, note, deadline
+  date        DateTime
+  createdBy   String
+  createdAt   DateTime @default(now())
+
+  case LegalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+model CaseComment {
+  id        String   @id @default(cuid())
+  caseId    String
+  content   String
+  isInternal Boolean @default(false)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  case LegalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+model CaseNote {
+  id        String   @id @default(cuid())
+  caseId    String
+  title     String
+  content   String
+  authorId  String
+  isPinned  Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  case LegalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+model Hearing {
+  id          String   @id @default(cuid())
+  caseId      String
+  title       String
+  date        DateTime
+  time        String
+  location    String?
+  judge       String?
+  notes       String?
+  status      String   @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED, POSTPONED
+  createdAt   DateTime @default(now())
+
+  case LegalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([date])
+}
+
+model CaseDeadline {
+  id          String   @id @default(cuid())
+  caseId      String
+  title       String
+  date        DateTime
+  isCompleted Boolean @default(false)
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  case LegalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+// ============ APPOINTMENTS ============
+
+model Appointment {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  date          DateTime
+  startTime     String
+  endTime       String
+  status        String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW
+  type          String   @default("IN_PERSON") // IN_PERSON, VIDEO, PHONE
+  lawyerId      String
+  clientId      String
+  notes         String?
+  videoUrl      String?
+  reminderSent  Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  lawyer User @relation("AppointmentLawyer", fields: [lawyerId], references: [id])
+  client User @relation("AppointmentClient", fields: [clientId], references: [id])
+
+  @@index([lawyerId])
+  @@index([clientId])
+  @@index([date])
+  @@index([status])
+}
+
+// ============ FINANCIAL ============
+
+model Invoice {
+  id            String   @id @default(cuid())
+  invoiceNumber String   @unique
+  caseId        String?
+  clientId      String
+  amount        Float
+  tax           Float    @default(0)
+  discount      Float    @default(0)
+  total         Float
+  status        String   @default("PENDING") // PENDING, PAID, PARTIAL, OVERDUE, CANCELLED
+  dueDate       DateTime
+  paidAmount    Float    @default(0)
+  paidAt        DateTime?
+  createdBy     String
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  case       LegalCase? @relation(fields: [caseId], references: [id])
+  client     User       @relation("InvoiceClient", fields: [clientId], references: [id])
+  creator    User       @relation("InvoiceCreator", fields: [createdBy], references: [id])
+  payments       Payment[]
+  installments   Installment[]
+  timeEntries    TimeEntry[]
+
+  @@index([caseId])
+  @@index([clientId])
+  @@index([status])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  invoiceId     String?
+  amount        Float
+  method        String   // CARD, BANK_TRANSFER, CASH, WALLET, INSTALLMENT
+  status        String   @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  transactionId String?  @unique
+  description   String?
+  userId        String
+  createdAt     DateTime @default(now())
+
+  invoice Invoice? @relation(fields: [invoiceId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+
+  @@index([invoiceId])
+  @@index([userId])
+  @@index([status])
+}
+
+model WalletTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Float
+  type        String   // DEPOSIT, WITHDRAWAL, PAYMENT, REFUND
+  description String?
+  referenceId String?
+  balance     Float
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Installment {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  amount      Float
+  dueDate     DateTime
+  paidAmount  Float    @default(0)
+  status      String   @default("PENDING") // PENDING, PAID, OVERDUE
+  paidAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([dueDate])
+}
+
+// ============ TASKS ============
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("TODO") // TODO, IN_PROGRESS, DONE, CANCELLED
+  priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  dueDate     DateTime?
+  completedAt DateTime?
+  caseId      String?
+  assignedTo  String
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assignee    User       @relation(fields: [assignedTo], references: [id])
+  activities  Activity[]
+
+  @@index([assignedTo])
+  @@index([status])
+  @@index([caseId])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  type      String
+  title     String
+  description String?
+  userId    String?
+  caseId    String?
+  taskId    String?
+  createdAt DateTime @default(now())
+
+  user    User?       @relation(fields: [userId], references: [id])
+  case    LegalCase?  @relation(fields: [caseId], references: [id])
+  task    Task?       @relation(fields: [taskId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ============ MESSAGING ============
+
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String
+  receiverId  String
+  content     String
+  type        String   @default("TEXT") // TEXT, FILE, SYSTEM
+  isRead      Boolean  @default(false)
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  sender    User @relation("MessageSender", fields: [senderId], references: [id])
+  receiver  User @relation("MessageReceiver", fields: [receiverId], references: [id])
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+}
+
+// ============ SOCIAL / COMMUNITY ============
+
+model Post {
+  id        String   @id @default(cuid())
+  authorId  String
+  title     String?
+  content   String
+  type      String   @default("DISCUSSION") // DISCUSSION, ARTICLE, ANNOUNCEMENT, QUESTION, KNOWLEDGE
+  tags      String?  // JSON
+  isPinned  Boolean  @default(false)
+  likes     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    User      @relation(fields: [authorId], references: [id])
+  comments  Comment[]
+
+  @@index([authorId])
+  @@index([type])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  post  Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([postId])
+}
+
+// ============ LMS ============
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  instructorId String
+  type        String   @default("COURSE") // COURSE, WEBINAR
+  status      String   @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  thumbnail   String?
+  duration    Int      @default(0) // minutes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  enrollments Enrollment[]
+  lessons     Lesson[]
+
+  @@index([instructorId])
+  @@index([status])
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  content     String?
+  videoUrl    String?
+  order       Int      @default(0)
+  duration    Int      @default(0) // minutes
+  createdAt   DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+}
+
+model Enrollment {
+  id            String   @id @default(cuid())
+  userId        String
+  courseId      String
+  status        String   @default("ACTIVE") // ACTIVE, COMPLETED, DROPPED
+  progress      Float    @default(0)
+  completedAt   DateTime?
+  certificateId String?
+  createdAt     DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  course  Course  @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+}
+
+model Exam {
+  id          String   @id @default(cuid())
+  courseId    String?
+  title       String
+  questions   String   // JSON
+  passingScore Float   @default(60)
+  duration    Int      @default(60) // minutes
+  createdAt   DateTime @default(now())
+
+  results ExamResult[]
+
+  @@index([courseId])
+}
+
+model ExamResult {
+  id            String   @id @default(cuid())
+  examId        String
+  userId        String
+  score         Float
+  answers       String   // JSON
+  passed        Boolean
+  completedAt   DateTime
+
+  exam Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@index([examId])
+  @@index([userId])
+}
+
+// ============ DOCUMENTS ============
+
+model Document {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  filePath    String
+  fileSize    Int
+  mimeType    String?
+  category    String?
+  tags        String?  // JSON
+  version     Int      @default(1)
+  uploadedBy  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [uploadedBy], references: [id])
+
+  @@index([category])
+  @@index([uploadedBy])
+}
+
+// ============ NOTIFICATIONS ============
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, WARNING, ERROR, SUCCESS
+  category  String   // case, appointment, payment, system, message
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  link      String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+// ============ CALENDAR ============
+
+model CalendarEvent {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?
+  date        DateTime
+  startTime   String?
+  endTime     String?
+  type        String   @default("MEETING") // MEETING, DEADLINE, HEARING, TASK, REMINDER
+  color       String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([date])
+}
+
+// ============ TIME TRACKING ============
+
+model TimeEntry {
+  id          String   @id @default(cuid())
+  userId      String
+  caseId      String?
+  date        DateTime
+  hours       Float
+  description String?
+  isBilled    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user    User       @relation(fields: [userId], references: [id])
+  invoice Invoice[]
+
+  @@index([userId])
+  @@index([caseId])
+}
+
+// ============ CRM ============
+
+model Lead {
+  id            String   @id @default(cuid())
+  assignedToId  String
+  name          String
+  email         String?
+  phone         String?
+  source        String?
+  status        String   @default("NEW") // NEW, CONTACTED, QUALIFIED, CONVERTED, LOST
+  notes         String?
+  value         Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  assignedTo User @relation(fields: [assignedToId], references: [id])
+
+  @@index([assignedToId])
+  @@index([status])
+}
+
+// ============ SETTINGS ============
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  updatedAt DateTime @updatedAt
+}
