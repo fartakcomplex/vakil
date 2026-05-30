@@ -126,3 +126,69 @@ Significantly improved all form dialogs across 10 pages in the LegalHub legal pr
 - Dev server compiled successfully
 - All list/listing logic preserved unchanged
 - No breaking changes to existing functionality
+
+---
+
+## Date: 2026-05-30
+
+## Role-Specific Dashboards Implementation
+
+### Summary
+Implemented three separate role-specific dashboards/cartables for the LegalHub application. Each role (Lawyer, Manager, Client) now sees their own personalized view when logging in, instead of the generic overview.
+
+### Files Created
+1. **`src/components/pages/lawyer-cartable.tsx`** — Lawyer's personal cartable
+   - Filtered data: only shows lawyer's own cases, tasks, appointments
+   - 5 stat cards: active cases, pending tasks, today's appointments, hours logged, personal revenue
+   - Today's appointments list with time and client info
+   - Upcoming hearings and deadlines (next 7 days)
+   - My cases list with status badges and next hearing dates
+   - Case status pie chart
+   - Pending tasks sorted by priority
+   - My clients list (extracted from assigned cases)
+   - Recent activity feed
+
+2. **`src/components/pages/manager-dashboard.tsx`** — Complex Manager's overview
+   - Full overview of entire legal complex
+   - 6 stat cards: total cases, open cases, revenue, overdue invoices, active tasks, active leads
+   - Quick actions: new case, appointments, user management, financial reports
+   - Revenue bar chart (monthly) with custom tooltip
+   - Case status pie chart distribution
+   - Income/expense trend line chart
+   - Case type distribution bar chart (horizontal)
+   - **Team performance table** with per-lawyer stats (cases, tasks, hours, revenue, progress bar)
+   - Recent cases list
+   - Deadlines this week
+   - Team tasks overview with assignee names
+
+3. **`src/components/pages/client-dashboard.tsx`** — Client's personal dashboard
+   - Filtered data: only shows client's own cases, invoices, appointments
+   - 4 stat cards: active cases, unpaid invoices (with overdue badge), upcoming appointments, total paid
+   - **My lawyers section** — shows assigned lawyers with specialization and "send message" button
+   - Upcoming appointments with type icons and date/time
+   - My cases with lawyer name, court info, and next hearing
+   - Upcoming court hearings
+   - Recent invoices with status badges and amounts
+   - Quick access actions: message lawyer, view invoices, view cases, notifications
+
+### Files Modified
+4. **`src/components/pages/dashboard-page.tsx`** — Now a role router
+   - Routes to LawyerCartable for LAWYER/INTERN roles
+   - Routes to ManagerDashboard for SUPER_ADMIN/COMPLEX_MANAGER/ACCOUNTANT/SUPPORT_STAFF
+   - Routes to ClientDashboard for CLIENT role
+
+5. **`src/components/app-shell.tsx`** — Sidebar navigation
+   - Added `getDashboardLabel()` function for role-specific nav labels
+   - LAWYER/INTERN → "کارتابل من"
+   - CLIENT → "داشبورد من"
+   - SUPER_ADMIN/COMPLEX_MANAGER → "داشبورد مدیریت"
+   - Updated both expanded and collapsed sidebar to use dynamic labels
+   - Changed sidebar grouping from index-based to id-based filtering
+
+6. **`src/lib/persian.ts`** — New translations
+   - Added 12 new dashboard translation keys (myCartable, managerDashboard, clientDashboard, myCases, myTasks, etc.)
+
+### Verification
+- `next build` compiled successfully (0 errors)
+- All three role logins tested successfully (lawyer1@, manager@, client1@)
+- Server running on port 3000

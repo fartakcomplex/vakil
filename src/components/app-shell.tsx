@@ -44,6 +44,17 @@ const NAV_ITEMS = [
   { id: 'settings', label: 'nav.settings', icon: Settings },
 ];
 
+function getDashboardLabel(role?: string | null): string {
+  switch (role) {
+    case 'LAWYER': return 'کارتابل من';
+    case 'INTERN': return 'کارتابل من';
+    case 'CLIENT': return 'داشبورد من';
+    case 'SUPER_ADMIN': return 'داشبورد مدیریت';
+    case 'COMPLEX_MANAGER': return 'داشبورد مدیریت';
+    default: return 'nav.dashboard';
+  }
+}
+
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { currentPage, setPage, currentUser, notifications } = useAppStore();
   const lang = 'fa';
@@ -53,12 +64,18 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     return currentUser && item.roles.includes(currentUser.role);
   });
 
+  // Override dashboard label based on role
+  const navItemsWithRoleLabel = filteredNav.map(item => ({
+    ...item,
+    label: item.id === 'dashboard' ? getDashboardLabel(currentUser?.role) : item.label,
+  }));
+
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const grouped = [
-    { label: 'اصلی', items: filteredNav.slice(0, 8) },
-    { label: 'مدیریت', items: filteredNav.slice(8, 15) },
-    { label: 'سیستم', items: filteredNav.slice(15) },
+    { label: 'اصلی', items: navItemsWithRoleLabel.filter(i => ['dashboard','cases','appointments','invoices','tasks','messages','notifications','social'].includes(i.id)) },
+    { label: 'مدیریت', items: navItemsWithRoleLabel.filter(i => ['clients','documents','courses','calendar','timeTracking','leads','financialAnalytics'].includes(i.id)) },
+    { label: 'سیستم', items: navItemsWithRoleLabel.filter(i => ['reports','users','ai-assistant','settings'].includes(i.id)) },
   ];
 
   return (
@@ -131,6 +148,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               {NAV_ITEMS.filter((item) => !item.roles || currentUser?.role && item.roles.includes(currentUser.role)).map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPage === item.id;
+                const label = item.id === 'dashboard' ? getDashboardLabel(currentUser?.role) : item.label;
                 return (
                   <TooltipProvider key={item.id} delayDuration={0}>
                     <Tooltip>
@@ -140,7 +158,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                           {item.id === 'notifications' && unreadNotifs > 0 && <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />}
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent side="right"><p>{t(item.label, lang)}</p></TooltipContent>
+                      <TooltipContent side="right"><p>{t(label, lang)}</p></TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 );

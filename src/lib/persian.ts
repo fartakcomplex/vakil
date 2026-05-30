@@ -71,6 +71,17 @@ export const translations: Translations = {
   'dashboard.upcomingHearings': { fa: 'جلسات دادگاه آینده', en: 'Upcoming Hearings' },
   'dashboard.unpaidInvoices': { fa: 'فاکتورهای پرداخت نشده', en: 'Unpaid Invoices' },
   'dashboard.welcome': { fa: 'خوش آمدید', en: 'Welcome' },
+  'dashboard.myCartable': { fa: 'کارتابل من', en: 'My Cartable' },
+  'dashboard.managerDashboard': { fa: 'داشبورد مدیریت', en: 'Manager Dashboard' },
+  'dashboard.clientDashboard': { fa: 'داشبورد من', en: 'My Dashboard' },
+  'dashboard.myCases': { fa: 'پرونده‌های من', en: 'My Cases' },
+  'dashboard.myTasks': { fa: 'وظایف من', en: 'My Tasks' },
+  'dashboard.myAppointments': { fa: 'نوبت‌های من', en: 'My Appointments' },
+  'dashboard.myInvoices': { fa: 'فاکتورهای من', en: 'My Invoices' },
+  'dashboard.myLawyers': { fa: 'وکلای من', en: 'My Lawyers' },
+  'dashboard.myClients': { fa: 'موکلین من', en: 'My Clients' },
+  'dashboard.teamPerformance': { fa: 'عملکرد تیم', en: 'Team Performance' },
+  'dashboard.recentActivity': { fa: 'فعالیت‌های اخیر', en: 'Recent Activity' },
 
   // ============ CASES ============
   'cases.title': { fa: 'مدیریت پرونده‌ها', en: 'Case Management' },
