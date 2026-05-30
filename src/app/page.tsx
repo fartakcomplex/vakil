@@ -23,6 +23,8 @@ import AiAssistantPage from '@/components/pages/ai-assistant-page';
 import NotificationsPage from '@/components/pages/notifications-page';
 import UsersPage from '@/components/pages/users-page';
 import TimeTrackingPage from '@/components/pages/time-tracking-page';
+import FinancialAnalyticsPage from '@/components/pages/financial-analytics-page';
+import LandingPage from '@/components/pages/landing-page';
 
 const PAGE_MAP: Record<string, React.ComponentType> = {
   dashboard: DashboardPage,
@@ -43,6 +45,7 @@ const PAGE_MAP: Record<string, React.ComponentType> = {
   notifications: NotificationsPage,
   users: UsersPage,
   timeTracking: TimeTrackingPage,
+  financialAnalytics: FinancialAnalyticsPage,
 };
 
 const API_ENDPOINTS = [
@@ -65,7 +68,6 @@ const API_ENDPOINTS = [
 
 export default function Home() {
   const { isAuthenticated, currentPage, token } = useAppStore();
-
   // Hydrate from localStorage on mount
   useEffect(() => {
     // Check if theme class matches store
@@ -157,8 +159,12 @@ export default function Home() {
     fetchAllData();
   }, [isAuthenticated, fetchAllData]);
 
-  // Show login/register if not authenticated
+  // Show landing page first when not authenticated
+  // currentPage 'dashboard' is the default - show landing page instead
   if (!isAuthenticated) {
+    if (currentPage === 'dashboard' || currentPage === 'landing') {
+      return <LandingPage />;
+    }
     if (currentPage === 'register') {
       return <RegisterPage />;
     }

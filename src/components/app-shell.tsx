@@ -18,7 +18,7 @@ import {
   Scale, LayoutDashboard, Briefcase, CalendarDays, FileText, ClipboardList,
   MessageSquare, Bell, Users, BookOpen, Rss, FolderOpen,
   TrendingUp, Target, Settings, Bot, Clock, Menu, Search, Sun, Moon,
-  LogOut, User, ChevronLeft, ChevronRight, X,
+  LogOut, User, ChevronLeft, ChevronRight, X, DollarSign,
 } from 'lucide-react';
 
 // Navigation items
@@ -37,6 +37,7 @@ const NAV_ITEMS = [
   { id: 'calendar', label: 'nav.calendar', icon: CalendarDays },
   { id: 'timeTracking', label: 'nav.timeTracking', icon: Clock },
   { id: 'leads', label: 'nav.leads', icon: Target, roles: ['SUPER_ADMIN', 'COMPLEX_MANAGER', 'LAWYER'] },
+  { id: 'financialAnalytics', label: 'nav.financialAnalytics', icon: DollarSign, roles: ['SUPER_ADMIN', 'COMPLEX_MANAGER', 'ACCOUNTANT'] },
   { id: 'reports', label: 'nav.reports', icon: TrendingUp, roles: ['SUPER_ADMIN', 'COMPLEX_MANAGER', 'ACCOUNTANT'] },
   { id: 'users', label: 'nav.users', icon: Users, roles: ['SUPER_ADMIN'] },
   { id: 'ai-assistant', label: 'AI دستیار', icon: Bot },
