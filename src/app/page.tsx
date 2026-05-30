@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import type { User, LegalCase, Appointment, Invoice, Payment, Task, Notification, Post, Document, Course, Message, Lead, CalendarEvent, TimeEntry } from '@/lib/types';
 import AppShell from '@/components/app-shell';
@@ -69,6 +70,8 @@ const API_ENDPOINTS = [
 
 export default function Home() {
   const { isAuthenticated, currentPage, token } = useAppStore();
+  const [seedDone, setSeedDone] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   // Hydrate from localStorage on mount
   useEffect(() => {
     // Check if theme class matches store
@@ -158,26 +161,37 @@ export default function Home() {
     });
   }, []);
 
-  // Seed database on first load (before login, so users can log in)
-  const seededRef = useCallback(() => {
-    let done = false;
-    return () => {
-      if (done) return;
-      done = true;
-      fetch('/api/seed', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
-        .catch(() => { /* ignore */ });
+  // Seed database on first load and wait for completion
+  useEffect(() => {
+    const seed = async () => {
+      setSeeding(true);
+      try {
+        await fetch('/api/seed', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      } catch { /* ignore */ }
+      setSeedDone(true);
+      setSeeding(false);
     };
+    seed();
   }, []);
 
+  // Fetch data after login AND after seed completes
   useEffect(() => {
-    seededRef()();
-  }, [seededRef]);
-
-  // Fetch data after login
-  useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !seedDone) return;
     fetchAllData();
-  }, [isAuthenticated, fetchAllData]);
+  }, [isAuthenticated, seedDone, fetchAllData]);
+
+  // Show loading splash while seeding
+  if (seeding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 text-emerald-600 animate-spin mx-auto mb-4" />
+          <p className="text-lg font-medium text-emerald-800 dark:text-emerald-300">در حال آماده‌سازی سامانه...</p>
+          <p className="text-sm text-muted-foreground mt-2">لطفاً چند لحظه صبر کنید</p>
+        </div>
+      </div>
+    );
+  }
 
   // Show landing page first when not authenticated
   // currentPage 'dashboard' is the default - show landing page instead

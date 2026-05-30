@@ -32,8 +32,7 @@ export async function POST() {
     await db.caseDocument.deleteMany();
     await db.appointment.deleteMany();
     await db.legalCase.deleteMany();
-    await db.session.deleteMany();
-    await db.device.deleteMany();
+    // NOTE: session and device are transient - do NOT clear them during seeding
     await db.auditLog.deleteMany();
     await db.internProfile.deleteMany();
     await db.accountantProfile.deleteMany();
@@ -2066,7 +2065,77 @@ export async function POST() {
       }),
     ]);
 
-    // ============ CREATE COURSES ============
+    // ============ CASE SUB-DATA FOR CASE6 ============
+
+    // Case Timeline (4 entries for case6)
+    await Promise.all([
+      db.caseTimeline.create({
+        data: { caseId: case6.id, title: 'شکایت کارگر', description: 'ثبت شکایت اخراج غیرقانونی در دیوان حل اختلاف اداری کار', type: 'filing', date: new Date('2024-03-05'), createdBy: lawyer2.id },
+      }),
+      db.caseTimeline.create({
+        data: { caseId: case6.id, title: 'بررسی قرارداد کار', description: 'تحلیل قرارداد کار و بررسی دلایل اخراج', type: 'note', date: new Date('2024-03-20'), createdBy: intern2.id },
+      }),
+      db.caseTimeline.create({
+        data: { caseId: case6.id, title: 'جمع‌آوری مدارک حقوق معوق', description: 'تهیه فیش حقوقی ۶ ماه اخیر و محاسبه مطالبات معوق', type: 'filing', date: new Date('2024-04-10'), createdBy: intern2.id },
+      }),
+      db.caseTimeline.create({
+        data: { caseId: case6.id, title: 'جلسه اول دیوان تعیین شد', description: 'جلسه رسیدگی در شعبه ۲ دیوان حل اختلاف اداری کار برای ۲۰ مرداد تعیین شد', type: 'status_change', date: new Date('2024-06-15'), createdBy: lawyer2.id },
+      }),
+    ]);
+
+    // Case Notes (3 entries for case6)
+    await Promise.all([
+      db.caseNote.create({
+        data: { caseId: case6.id, title: 'خلاصه وضعیت کارگر', content: 'کارگر ۸ سال سابقه کار در کارخانه ذوب آهن. حقوق معوق ۶ ماه، عیدی و سنوات پرداخت نشده. اخراج بدون اخطار قبلی.', authorId: lawyer2.id, isPinned: true },
+      }),
+      db.caseNote.create({
+        data: { caseId: case6.id, title: 'مطالبات محاسبه شده', content: 'حقوق معوق: ۴۸۰ میلیون، عیدی: ۸۰ میلیون، سنوات: ۱۲۰ میلیون، مزایای شغل: ۴۰ میلیون. جمع: ۷۲۰ میلیون تومان', authorId: intern2.id, isPinned: true },
+      }),
+      db.caseNote.create({
+        data: { caseId: case6.id, title: 'نکات حقوقی', content: 'اخراج بدون اخطار قبلی طبق ماده ۲۷ قانون کار غیرقانونی است. مطالبه بازگشت به کار نیز ممکن است.', authorId: lawyer2.id, isPinned: false },
+      }),
+    ]);
+
+    // Hearings (3 for case6)
+    await Promise.all([
+      db.hearing.create({
+        data: { caseId: case6.id, title: 'جلسه اول دیوان حل اختلاف', date: new Date('2024-08-20'), time: '09:30', location: 'شعبه ۲ دیوان حل اختلاف اداری کار', judge: 'قاضی صلواتی', notes: 'بررسی دلایل شکایت و دفاعیات کارفرما', status: 'SCHEDULED' },
+      }),
+      db.hearing.create({
+        data: { caseId: case6.id, title: 'جلسه میانجی‌گری', date: new Date('2024-04-15'), time: '11:00', location: 'دفتر میانجی‌گری اداره کار', judge: null, notes: 'تلاش برای توافق بین کارگر و کارفرما قبل از مراجعه به دیوان', status: 'COMPLETED' },
+      }),
+      db.hearing.create({
+        data: { caseId: case6.id, title: 'جلسه استماع آخرین دفاعیات', date: new Date('2024-09-10'), time: '10:00', location: 'شعبه ۲ دیوان حل اختلاف اداری کار', judge: 'قاضی صلواتی', notes: 'در صورت عدم حصول توافق در جلسه اول', status: 'SCHEDULED' },
+      }),
+    ]);
+
+    // Case Deadlines (3 for case6)
+    await Promise.all([
+      db.caseDeadline.create({
+        data: { caseId: case6.id, title: 'مهلت ارائه لایحه دفاعیه', date: new Date('2024-08-10'), isCompleted: false, notes: 'تهیه و تقدیم لایحه دفاعیه به دیوان حل اختلاف' },
+      }),
+      db.caseDeadline.create({
+        data: { caseId: case6.id, title: 'مهلت تکمیل مدارک حقوقی', date: new Date('2024-07-25'), isCompleted: true, notes: 'فیش حقوقی، قرارداد کار و صورت‌جلسه اخراج تکمیل شد' },
+      }),
+      db.caseDeadline.create({
+        data: { caseId: case6.id, title: 'مهلت ارسال لیست شهود', date: new Date('2024-08-15'), isCompleted: false, notes: 'تهیه لیست همکاران کارگر به عنوان شهود' },
+      }),
+    ]);
+
+    // Case Documents (3 for case6)
+    await Promise.all([
+      db.caseDocument.create({
+        data: { caseId: case6.id, name: 'قرارداد کار', type: 'contract', filePath: '/uploads/cases/case6/contract.pdf', fileSize: 512000, uploadedBy: client3.id, tags: '"قرارداد", "کار"' },
+      }),
+      db.caseDocument.create({
+        data: { caseId: case6.id, name: 'فیش حقوقی ۶ ماه', type: 'evidence', filePath: '/uploads/cases/case6/payslips.pdf', fileSize: 896000, uploadedBy: intern2.id, tags: '"حقوق", "فیش"' },
+      }),
+      db.caseDocument.create({
+        data: { caseId: case6.id, name: 'نامه اخراج', type: 'correspondence', filePath: '/uploads/cases/case6/termination.pdf', fileSize: 256000, uploadedBy: client3.id, tags: '"اخراج", "نامه"' },
+      }),
+    ]);
+
+    // ============ CREATE COURSES (4 total) ============
 
     const course1 = await db.course.create({
       data: {
@@ -2101,16 +2170,51 @@ export async function POST() {
       },
     });
 
-    // Course lessons
+    const course4 = await db.course.create({
+      data: {
+        title: 'حقوق تجارت بین‌الملل',
+        description: 'آشنایی با قوانین تجارت بین‌المللی، قراردادهای بین‌المللی، حل و فصل اختلافات و داوری بین‌المللی',
+        instructorId: lawyer3.id,
+        type: 'COURSE',
+        status: 'PUBLISHED',
+        duration: 540,
+      },
+    });
+
+    // Course lessons (2-3 per course)
     await Promise.all([
       db.lesson.create({
-        data: { courseId: course1.id, title: 'مقدمه حقوق تجارت', content: 'تعریف تجارت و تاجر...', order: 1, duration: 45 },
+        data: { courseId: course1.id, title: 'مقدمه حقوق تجارت', content: 'تعریف تجارت و تاجر، شروط تاجر بودن', order: 1, duration: 45 },
       }),
       db.lesson.create({
-        data: { courseId: course1.id, title: 'شرکت‌های تجاری', content: 'انواع شرکت‌ها در قانون تجارت...', order: 2, duration: 60 },
+        data: { courseId: course1.id, title: 'شرکت‌های تجاری', content: 'انواع شرکت‌ها در قانون تجارت: سهامی، با مسئولیت محدود، نسبی و مختلط', order: 2, duration: 60 },
       }),
       db.lesson.create({
-        data: { courseId: course2.id, title: 'تعریف و عناصر کلاهبرداری', content: 'ماده ۱ قانون تشدید مجازات...', order: 1, duration: 45 },
+        data: { courseId: course1.id, title: 'اسناد تجاری', content: 'بررسی چک، سفته و برات و مقررات مربوطه', order: 3, duration: 50 },
+      }),
+      db.lesson.create({
+        data: { courseId: course2.id, title: 'تعریف و عناصر کلاهبرداری', content: 'ماده ۱ قانون تشدید مجازات مرتکبین ارتشاء و اختلاس و کلاهبرداری', order: 1, duration: 45 },
+      }),
+      db.lesson.create({
+        data: { courseId: course2.id, title: 'مجازات کلاهبرداری', content: 'مجازات‌های حبس، جزای نقدی و رد مال', order: 2, duration: 40 },
+      }),
+      db.lesson.create({
+        data: { courseId: course2.id, title: 'تفاوت کلاهبرداری و خیانت در امانت', content: 'مقایسه عناصر تشکیل‌دهنده و رویه قضایی', order: 3, duration: 35 },
+      }),
+      db.lesson.create({
+        data: { courseId: course3.id, title: 'خلاصه اصلاحات جدید', content: 'بررسی مهم‌ترین تغییرات قانون کار ۱۴۰۲', order: 1, duration: 60 },
+      }),
+      db.lesson.create({
+        data: { courseId: course3.id, title: 'تأثیر بر قراردادهای کار', content: 'تغییرات مربوط به قرارداد موقت و تسویه حقوق', order: 2, duration: 60 },
+      }),
+      db.lesson.create({
+        data: { courseId: course4.id, title: 'مقدمه حقوق تجارت بین‌الملل', content: 'تعریف، منابع و اصول کلی حقوق تجارت بین‌المللی', order: 1, duration: 50 },
+      }),
+      db.lesson.create({
+        data: { courseId: course4.id, title: 'قراردادهای بین‌المللی', content: 'انواع قراردادهای تجاری بین‌المللی و شرایط شکل‌گیری', order: 2, duration: 60 },
+      }),
+      db.lesson.create({
+        data: { courseId: course4.id, title: 'داوری بین‌المللی', content: 'مراحل داوری، دیوان داوری بین‌المللی و اجرای آرای داوری', order: 3, duration: 55 },
       }),
     ]);
 
@@ -2123,14 +2227,17 @@ export async function POST() {
       db.enrollment.create({ data: { userId: support.id, courseId: course2.id, status: 'ACTIVE', progress: 20 } }),
     ]);
 
-    // ============ WALLET TRANSACTIONS (5 total) ============
+    // ============ WALLET TRANSACTIONS (8 total) ============
 
     await Promise.all([
       db.walletTransaction.create({ data: { userId: client1.id, amount: 100000000, type: 'DEPOSIT', description: 'واریز اولیه به کیف پول', balance: 100000000 } }),
       db.walletTransaction.create({ data: { userId: client1.id, amount: 20000000, type: 'PAYMENT', description: 'پرداخت حق‌الوکاله پرونده کارگری', balance: 80000000 } }),
+      db.walletTransaction.create({ data: { userId: client1.id, amount: 5000000, type: 'PAYMENT', description: 'پرداخت مشاوره حقوقی تلفنی', balance: 75000000 } }),
       db.walletTransaction.create({ data: { userId: client2.id, amount: 50000000, type: 'DEPOSIT', description: 'واریز به کیف پول', balance: 50000000 } }),
       db.walletTransaction.create({ data: { userId: client2.id, amount: 15000000, type: 'PAYMENT', description: 'پرداخت مشاوره حقوقی', balance: 35000000 } }),
       db.walletTransaction.create({ data: { userId: client3.id, amount: 30000000, type: 'DEPOSIT', description: 'واریز به کیف پول', balance: 30000000 } }),
+      db.walletTransaction.create({ data: { userId: client3.id, amount: 20000000, type: 'PAYMENT', description: 'پرداخت حق‌الوکاله دعوی کارگری', balance: 10000000 } }),
+      db.walletTransaction.create({ data: { userId: client5.id, amount: 25000000, type: 'DEPOSIT', description: 'واریز به کیف پول برای پرونده بیمه', balance: 25000000 } }),
     ]);
 
     // ============ ACTIVITIES (10 total) ============
