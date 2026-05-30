@@ -716,3 +716,49 @@ model Setting {
   value String
   updatedAt DateTime @updatedAt
 }
+
+// ============ CONTRACT LIBRARY ============
+
+model ContractCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int      @default(0)
+  parentId    String?
+  parent      ContractCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    ContractCategory[] @relation("CategoryHierarchy")
+  contracts   Contract[]
+  createdAt   DateTime @default(now())
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model Contract {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  description   String?
+  content       String   // Full contract text (HTML)
+  summary       String?  // Short summary
+  categoryId    String
+  category      ContractCategory @relation(fields: [categoryId], references: [id])
+  tags          String?  // JSON array
+  applicableLaws String? // JSON array of applicable Iranian laws
+  difficulty    String   @default("GENERAL") // GENERAL, SPECIALIZED, ADVANCED
+  downloadCount Int      @default(0)
+  viewCount     Int      @default(0)
+  isPremium     Boolean  @default(false)
+  isPublished   Boolean  @default(true)
+  version       String   @default("1.0")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([difficulty])
+  @@index([isPublished])
+}

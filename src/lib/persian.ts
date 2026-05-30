@@ -413,6 +413,25 @@ export const translations: Translations = {
   'hearingStatus.CANCELLED': { fa: 'لغو شده', en: 'Cancelled' },
   'hearingStatus.POSTPONED': { fa: 'به تعویق افتاده', en: 'Postponed' },
 
+  // ============ CONTRACTS ============
+  'nav.contracts': { fa: 'قراردادها', en: 'Contracts' },
+  'contracts.title': { fa: 'کتابخانه قراردادها', en: 'Contract Library' },
+  'contracts.search': { fa: 'جستجوی قرارداد...', en: 'Search contracts...' },
+  'contracts.allCategories': { fa: 'همه دسته‌ها', en: 'All Categories' },
+  'contracts.allDifficulties': { fa: 'همه سطوح', en: 'All Levels' },
+  'contracts.general': { fa: 'عمومی', en: 'General' },
+  'contracts.specialized': { fa: 'تخصصی', en: 'Specialized' },
+  'contracts.advanced': { fa: 'پیشرفته', en: 'Advanced' },
+  'contracts.totalContracts': { fa: 'مجموع قراردادها', en: 'Total Contracts' },
+  'contracts.categories': { fa: 'دسته‌بندی‌ها', en: 'Categories' },
+  'contracts.applicableLaws': { fa: 'قوانین مرتبط', en: 'Applicable Laws' },
+  'contracts.copyText': { fa: 'کپی متن', en: 'Copy Text' },
+  'contracts.copied': { fa: 'کپی شد!', en: 'Copied!' },
+  'contracts.downloadCount': { fa: 'دانلود', en: 'Downloads' },
+  'contracts.viewCount': { fa: 'مشاهده', en: 'Views' },
+  'contracts.noResults': { fa: 'قراردادی یافت نشد', en: 'No contracts found' },
+  'contracts.version': { fa: 'نسخه', en: 'Version' },
+
   // ============ COMMON / UTILITY ============
   'common.save': { fa: 'ذخیره', en: 'Save' },
   'common.cancel': { fa: 'انصراف', en: 'Cancel' },

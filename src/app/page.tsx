@@ -27,6 +27,7 @@ import UsersPage from '@/components/pages/users-page';
 import TimeTrackingPage from '@/components/pages/time-tracking-page';
 import FinancialAnalyticsPage from '@/components/pages/financial-analytics-page';
 import LandingPage from '@/components/pages/landing-page';
+import ContractsPage from '@/components/pages/contracts-page';
 
 const PAGE_MAP: Record<string, React.ComponentType> = {
   dashboard: DashboardPage,
@@ -38,6 +39,7 @@ const PAGE_MAP: Record<string, React.ComponentType> = {
   social: SocialPage,
   clients: ClientsPage,
   documents: DocumentsPage,
+  contracts: ContractsPage,
   courses: CoursesPage,
   calendar: CalendarPage,
   reports: ReportsPage,
@@ -66,6 +68,7 @@ const API_ENDPOINTS = [
   '/api/time-entries?limit=100',
   '/api/users?limit=100',
   '/api/payments?limit=100',
+  '/api/contracts?limit=100',
 ];
 
 export default function Home() {

@@ -16,7 +16,7 @@ import { t } from '@/lib/persian';
 import { getInitials, getFullName } from '@/lib/utils-helpers';
 import {
   Scale, LayoutDashboard, Briefcase, CalendarDays, FileText, ClipboardList,
-  MessageSquare, Bell, Users, BookOpen, Rss, FolderOpen,
+  MessageSquare, Bell, Users, BookOpen, Rss, FolderOpen, BookMarked,
   TrendingUp, Target, Settings, Bot, Clock, Menu, Search, Sun, Moon,
   LogOut, User, ChevronLeft, ChevronRight, X, DollarSign,
 } from 'lucide-react';
@@ -33,6 +33,7 @@ const NAV_ITEMS = [
   { id: 'social', label: 'nav.social', icon: Rss },
   { id: 'clients', label: 'nav.all', icon: Users, roles: ['SUPER_ADMIN', 'COMPLEX_MANAGER', 'LAWYER'] },
   { id: 'documents', label: 'nav.documents', icon: FolderOpen },
+  { id: 'contracts', label: 'nav.contracts', icon: BookMarked },
   { id: 'courses', label: 'nav.courses', icon: BookOpen },
   { id: 'calendar', label: 'nav.calendar', icon: CalendarDays },
   { id: 'timeTracking', label: 'nav.timeTracking', icon: Clock },
@@ -74,7 +75,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   const grouped = [
     { label: 'اصلی', items: navItemsWithRoleLabel.filter(i => ['dashboard','cases','appointments','invoices','tasks','messages','notifications','social'].includes(i.id)) },
-    { label: 'مدیریت', items: navItemsWithRoleLabel.filter(i => ['clients','documents','courses','calendar','timeTracking','leads','financialAnalytics'].includes(i.id)) },
+    { label: 'مدیریت', items: navItemsWithRoleLabel.filter(i => ['clients','documents','contracts','courses','calendar','timeTracking','leads','financialAnalytics'].includes(i.id)) },
     { label: 'سیستم', items: navItemsWithRoleLabel.filter(i => ['reports','users','ai-assistant','settings'].includes(i.id)) },
   ];
 
