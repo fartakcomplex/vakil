@@ -136,15 +136,26 @@ export default function Home() {
     });
   }, []);
 
-  // Seed and fetch data on mount
+  // Seed database on first load (before login, so users can log in)
+  const seededRef = useCallback(() => {
+    let done = false;
+    return () => {
+      if (done) return;
+      done = true;
+      fetch('/api/seed', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+        .catch(() => { /* ignore */ });
+    };
+  }, []);
+
+  useEffect(() => {
+    seededRef()();
+  }, [seededRef]);
+
+  // Fetch data after login
   useEffect(() => {
     if (!isAuthenticated) return;
-
-    // Try seed first, then fetch
-    fetch('/api/seed', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } })
-      .catch(() => { /* ignore if already seeded */ })
-      .finally(() => fetchAllData());
-  }, [isAuthenticated, token, fetchAllData]);
+    fetchAllData();
+  }, [isAuthenticated, fetchAllData]);
 
   // Show login/register if not authenticated
   if (!isAuthenticated) {

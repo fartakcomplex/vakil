@@ -303,48 +303,58 @@ export async function POST() {
     });
 
     // Client Profiles
-    await db.clientProfile.createMany([
-      {
-        userId: client1.id,
-        company: 'شرکت فناوری اطلاعات پارس',
-        address: 'تهران، خیابان ولیعصر، پلاک ۱۲۳',
-        city: 'تهران',
-        province: 'تهران',
-        postalCode: '1234567890',
-        occupation: 'مدیرعامل',
-      },
-      {
-        userId: client2.id,
-        company: 'بازرگانی امین',
-        address: 'اصفهان، خیابان چهارباغ، پلاک ۴۵۶',
-        city: 'اصفهان',
-        province: 'اصفهان',
-        postalCode: '2345678901',
-        occupation: 'تاجر',
-      },
-      {
-        userId: client3.id,
-        address: 'شیراز، خیابان زند، پلاک ۷۸۹',
-        city: 'شیراز',
-        province: 'فارس',
-        postalCode: '3456789012',
-        occupation: 'مهندس',
-      },
-      {
-        userId: client4.id,
-        company: 'گروه صنعتی نوین',
-        address: 'تهران، خیابان آزادی، پلاک ۳۲۱',
-        city: 'تهران',
-        province: 'تهران',
-        occupation: 'مدیر مالی',
-      },
-      {
-        userId: client5.id,
-        address: 'مشهد، خیابان امام رضا، پلاک ۶۵۴',
-        city: 'مشهد',
-        province: 'خراسان رضوی',
-        occupation: 'پزشک',
-      },
+    await Promise.all([
+      db.clientProfile.create({
+        data: {
+          userId: client1.id,
+          company: 'شرکت فناوری اطلاعات پارس',
+          address: 'تهران، خیابان ولیعصر، پلاک ۱۲۳',
+          city: 'تهران',
+          province: 'تهران',
+          postalCode: '1234567890',
+          occupation: 'مدیرعامل',
+        },
+      }),
+      db.clientProfile.create({
+        data: {
+          userId: client2.id,
+          company: 'بازرگانی امین',
+          address: 'اصفهان، خیابان چهارباغ، پلاک ۴۵۶',
+          city: 'اصفهان',
+          province: 'اصفهان',
+          postalCode: '2345678901',
+          occupation: 'تاجر',
+        },
+      }),
+      db.clientProfile.create({
+        data: {
+          userId: client3.id,
+          address: 'شیراز، خیابان زند، پلاک ۷۸۹',
+          city: 'شیراز',
+          province: 'فارس',
+          postalCode: '3456789012',
+          occupation: 'مهندس',
+        },
+      }),
+      db.clientProfile.create({
+        data: {
+          userId: client4.id,
+          company: 'گروه صنعتی نوین',
+          address: 'تهران، خیابان آزادی، پلاک ۳۲۱',
+          city: 'تهران',
+          province: 'تهران',
+          occupation: 'مدیر مالی',
+        },
+      }),
+      db.clientProfile.create({
+        data: {
+          userId: client5.id,
+          address: 'مشهد، خیابان امام رضا، پلاک ۶۵۴',
+          city: 'مشهد',
+          province: 'خراسان رضوی',
+          occupation: 'پزشک',
+        },
+      }),
     ]);
 
     // 6. Accountant
@@ -485,62 +495,72 @@ export async function POST() {
 
     // ============ CREATE APPOINTMENTS ============
 
-    await db.appointment.createMany([
-      {
-        title: 'مشاوره حقوقی اولیه',
-        description: 'بررسی اولیه پرونده ملکی و ارائه راهکار',
-        date: new Date('2024-07-15'),
-        startTime: '10:00',
-        endTime: '11:00',
-        status: 'CONFIRMED',
-        type: 'IN_PERSON',
-        lawyerId: lawyer1.id,
-        clientId: client1.id,
-      },
-      {
-        title: 'جلسه بررسی مدارک کیفری',
-        description: 'بررسی مدارک و شواهد پرونده کلاهبرداری',
-        date: new Date('2024-07-20'),
-        startTime: '14:00',
-        endTime: '15:30',
-        status: 'CONFIRMED',
-        type: 'IN_PERSON',
-        lawyerId: lawyer2.id,
-        clientId: client2.id,
-      },
-      {
-        title: 'مشاوره آنلاین قرارداد',
-        description: 'مشاوره ویدیویی درباره قرارداد تجاری بین‌المللی',
-        date: new Date('2024-07-22'),
-        startTime: '09:00',
-        endTime: '10:00',
-        status: 'PENDING',
-        type: 'VIDEO',
-        lawyerId: lawyer3.id,
-        clientId: client3.id,
-      },
-      {
-        title: 'جلسه پیگیری پرونده خانوادگی',
-        description: 'بررسی وضعیت دعوی حضانت',
-        date: new Date('2024-07-25'),
-        startTime: '11:00',
-        endTime: '12:00',
-        status: 'PENDING',
-        type: 'IN_PERSON',
-        lawyerId: lawyer1.id,
-        clientId: client4.id,
-      },
-      {
-        title: 'مشاوره تلفنی بیمه',
-        description: 'مشاوره درباره مراحل بعدی پرونده بیمه',
-        date: new Date('2024-06-28'),
-        startTime: '16:00',
-        endTime: '16:30',
-        status: 'COMPLETED',
-        type: 'PHONE',
-        lawyerId: lawyer1.id,
-        clientId: client5.id,
-      },
+    await Promise.all([
+      db.appointment.create({
+        data: {
+          title: 'مشاوره حقوقی اولیه',
+          description: 'بررسی اولیه پرونده ملکی و ارائه راهکار',
+          date: new Date('2024-07-15'),
+          startTime: '10:00',
+          endTime: '11:00',
+          status: 'CONFIRMED',
+          type: 'IN_PERSON',
+          lawyerId: lawyer1.id,
+          clientId: client1.id,
+        },
+      }),
+      db.appointment.create({
+        data: {
+          title: 'جلسه بررسی مدارک کیفری',
+          description: 'بررسی مدارک و شواهد پرونده کلاهبرداری',
+          date: new Date('2024-07-20'),
+          startTime: '14:00',
+          endTime: '15:30',
+          status: 'CONFIRMED',
+          type: 'IN_PERSON',
+          lawyerId: lawyer2.id,
+          clientId: client2.id,
+        },
+      }),
+      db.appointment.create({
+        data: {
+          title: 'مشاوره آنلاین قرارداد',
+          description: 'مشاوره ویدیویی درباره قرارداد تجاری بین‌المللی',
+          date: new Date('2024-07-22'),
+          startTime: '09:00',
+          endTime: '10:00',
+          status: 'PENDING',
+          type: 'VIDEO',
+          lawyerId: lawyer3.id,
+          clientId: client3.id,
+        },
+      }),
+      db.appointment.create({
+        data: {
+          title: 'جلسه پیگیری پرونده خانوادگی',
+          description: 'بررسی وضعیت دعوی حضانت',
+          date: new Date('2024-07-25'),
+          startTime: '11:00',
+          endTime: '12:00',
+          status: 'PENDING',
+          type: 'IN_PERSON',
+          lawyerId: lawyer1.id,
+          clientId: client4.id,
+        },
+      }),
+      db.appointment.create({
+        data: {
+          title: 'مشاوره تلفنی بیمه',
+          description: 'مشاوره درباره مراحل بعدی پرونده بیمه',
+          date: new Date('2024-06-28'),
+          startTime: '16:00',
+          endTime: '16:30',
+          status: 'COMPLETED',
+          type: 'PHONE',
+          lawyerId: lawyer1.id,
+          clientId: client5.id,
+        },
+      }),
     ]);
 
     // ============ CREATE INVOICES ============
@@ -616,390 +636,466 @@ export async function POST() {
 
     // ============ CREATE PAYMENTS ============
 
-    await db.payment.createMany([
-      {
-        invoiceId: inv1.id,
-        amount: 30000000,
-        method: 'BANK_TRANSFER',
-        status: 'COMPLETED',
-        transactionId: 'TXN-10001',
-        description: 'پیش‌پرداخت فاکتور ۰۰۰۱',
-        userId: client1.id,
-        createdAt: new Date('2024-01-20'),
-      },
-      {
-        invoiceId: inv2.id,
-        amount: 20000000,
-        method: 'CARD',
-        status: 'COMPLETED',
-        transactionId: 'TXN-10002',
-        description: 'قسط اول فاکتور کیفری',
-        userId: client2.id,
-        createdAt: new Date('2024-03-05'),
-      },
-      {
-        invoiceId: null,
-        amount: 15000000,
-        method: 'CASH',
-        status: 'COMPLETED',
-        description: 'مشاوره حقوقی حضوری',
-        userId: client5.id,
-        createdAt: new Date('2024-06-25'),
-      },
+    await Promise.all([
+      db.payment.create({
+        data: {
+          invoiceId: inv1.id,
+          amount: 30000000,
+          method: 'BANK_TRANSFER',
+          status: 'COMPLETED',
+          transactionId: 'TXN-10001',
+          description: 'پیش‌پرداخت فاکتور ۰۰۰۱',
+          userId: client1.id,
+          createdAt: new Date('2024-01-20'),
+        },
+      }),
+      db.payment.create({
+        data: {
+          invoiceId: inv2.id,
+          amount: 20000000,
+          method: 'CARD',
+          status: 'COMPLETED',
+          transactionId: 'TXN-10002',
+          description: 'قسط اول فاکتور کیفری',
+          userId: client2.id,
+          createdAt: new Date('2024-03-05'),
+        },
+      }),
+      db.payment.create({
+        data: {
+          invoiceId: null,
+          amount: 15000000,
+          method: 'CASH',
+          status: 'COMPLETED',
+          description: 'مشاوره حقوقی حضوری',
+          userId: client5.id,
+          createdAt: new Date('2024-06-25'),
+        },
+      }),
     ]);
 
     // ============ CREATE TASKS ============
 
-    await db.task.createMany([
-      {
-        title: 'تهیه لایحه دفاعیه پرونده ملکی',
-        description: 'تهیه لایحه دفاعیه کامل برای جلسه دادگاه تاریخ ۱۰ مرداد',
-        status: 'IN_PROGRESS',
-        priority: 'URGENT',
-        dueDate: new Date('2024-08-08'),
-        caseId: case1.id,
-        assignedTo: lawyer1.id,
-        createdBy: manager.id,
-      },
-      {
-        title: 'جمع‌آوری مدارک کیفری',
-        description: 'جمع‌آوری و بررسی تمام مدارک و شواهد پرونده کلاهبرداری',
-        status: 'TODO',
-        priority: 'HIGH',
-        dueDate: new Date('2024-07-28'),
-        caseId: case2.id,
-        assignedTo: intern2.id,
-        createdBy: lawyer2.id,
-      },
-      {
-        title: 'بررسی قرارداد بین‌المللی',
-        description: 'بررسی قوانین بین‌المللی و تطابق با حقوق ایران',
-        status: 'IN_PROGRESS',
-        priority: 'HIGH',
-        dueDate: new Date('2024-07-30'),
-        caseId: case3.id,
-        assignedTo: lawyer3.id,
-        createdBy: manager.id,
-      },
-      {
-        title: 'آماده‌سازی پرونده حضانت',
-        description: 'تهیه مدارک لازم برای جلسه دادگاه خانواده',
-        status: 'TODO',
-        priority: 'MEDIUM',
-        dueDate: new Date('2024-07-23'),
-        caseId: case4.id,
-        assignedTo: intern1.id,
-        createdBy: lawyer1.id,
-      },
-      {
-        title: 'ثبت صورت‌جلسه دادگاه',
-        description: 'ثبت و بایگانی صورت‌جلسه جلسه دادگاه پرونده بیمه',
-        status: 'DONE',
-        priority: 'LOW',
-        caseId: case5.id,
-        assignedTo: support.id,
-        createdBy: lawyer1.id,
-        completedAt: new Date('2024-06-10'),
-      },
+    await Promise.all([
+      db.task.create({
+        data: {
+          title: 'تهیه لایحه دفاعیه پرونده ملکی',
+          description: 'تهیه لایحه دفاعیه کامل برای جلسه دادگاه تاریخ ۱۰ مرداد',
+          status: 'IN_PROGRESS',
+          priority: 'URGENT',
+          dueDate: new Date('2024-08-08'),
+          caseId: case1.id,
+          assignedTo: lawyer1.id,
+          createdBy: manager.id,
+        },
+      }),
+      db.task.create({
+        data: {
+          title: 'جمع‌آوری مدارک کیفری',
+          description: 'جمع‌آوری و بررسی تمام مدارک و شواهد پرونده کلاهبرداری',
+          status: 'TODO',
+          priority: 'HIGH',
+          dueDate: new Date('2024-07-28'),
+          caseId: case2.id,
+          assignedTo: intern2.id,
+          createdBy: lawyer2.id,
+        },
+      }),
+      db.task.create({
+        data: {
+          title: 'بررسی قرارداد بین‌المللی',
+          description: 'بررسی قوانین بین‌المللی و تطابق با حقوق ایران',
+          status: 'IN_PROGRESS',
+          priority: 'HIGH',
+          dueDate: new Date('2024-07-30'),
+          caseId: case3.id,
+          assignedTo: lawyer3.id,
+          createdBy: manager.id,
+        },
+      }),
+      db.task.create({
+        data: {
+          title: 'آماده‌سازی پرونده حضانت',
+          description: 'تهیه مدارک لازم برای جلسه دادگاه خانواده',
+          status: 'TODO',
+          priority: 'MEDIUM',
+          dueDate: new Date('2024-07-23'),
+          caseId: case4.id,
+          assignedTo: intern1.id,
+          createdBy: lawyer1.id,
+        },
+      }),
+      db.task.create({
+        data: {
+          title: 'ثبت صورت‌جلسه دادگاه',
+          description: 'ثبت و بایگانی صورت‌جلسه جلسه دادگاه پرونده بیمه',
+          status: 'DONE',
+          priority: 'LOW',
+          caseId: case5.id,
+          assignedTo: support.id,
+          createdBy: lawyer1.id,
+          completedAt: new Date('2024-06-10'),
+        },
+      }),
     ]);
 
     // ============ CREATE NOTIFICATIONS ============
 
-    await db.notification.createMany([
-      { userId: lawyer1.id, title: 'جلسه دادگاه نزدیک است', message: 'جلسه بعدی دادگاه پرونده ملکی در تاریخ ۱۰ مرداد برگزار می‌شود', type: 'WARNING', category: 'case' },
-      { userId: lawyer2.id, title: 'مدارک جدید بارگذاری شد', message: 'مدارک جدیدی برای پرونده کیفری توسط کارشناس بارگذاری شده', type: 'INFO', category: 'case' },
-      { userId: client1.id, title: 'فاکتور جدید', message: 'فاکتور جدیدی برای پرونده حقوقی شما صادر شده است', type: 'INFO', category: 'payment' },
-      { userId: manager.id, title: 'گزارش هفتگی', message: 'گزارش عملکرد هفته گذشته آماده مشاهده است', type: 'INFO', category: 'system' },
-      { userId: intern1.id, title: 'وظیفه جدید', message: 'وظیفه جدیدی به شما اختصاص یافت: آماده‌سازی پرونده حضانت', type: 'INFO', category: 'system' },
-      { userId: accountant.id, title: 'پرداخت جدید', message: 'یک پرداخت جدید ثبت شده و نیاز به بررسی دارد', type: 'INFO', category: 'payment' },
+    await Promise.all([
+      db.notification.create({ data: { userId: lawyer1.id, title: 'جلسه دادگاه نزدیک است', message: 'جلسه بعدی دادگاه پرونده ملکی در تاریخ ۱۰ مرداد برگزار می‌شود', type: 'WARNING', category: 'case' } }),
+      db.notification.create({ data: { userId: lawyer2.id, title: 'مدارک جدید بارگذاری شد', message: 'مدارک جدیدی برای پرونده کیفری توسط کارشناس بارگذاری شده', type: 'INFO', category: 'case' } }),
+      db.notification.create({ data: { userId: client1.id, title: 'فاکتور جدید', message: 'فاکتور جدیدی برای پرونده حقوقی شما صادر شده است', type: 'INFO', category: 'payment' } }),
+      db.notification.create({ data: { userId: manager.id, title: 'گزارش هفتگی', message: 'گزارش عملکرد هفته گذشته آماده مشاهده است', type: 'INFO', category: 'system' } }),
+      db.notification.create({ data: { userId: intern1.id, title: 'وظیفه جدید', message: 'وظیفه جدیدی به شما اختصاص یافت: آماده‌سازی پرونده حضانت', type: 'INFO', category: 'system' } }),
+      db.notification.create({ data: { userId: accountant.id, title: 'پرداخت جدید', message: 'یک پرداخت جدید ثبت شده و نیاز به بررسی دارد', type: 'INFO', category: 'payment' } }),
     ]);
 
     // ============ CREATE POSTS ============
 
-    await db.post.createMany([
-      {
-        authorId: lawyer1.id,
-        title: 'راهنمای حقوقی: حقوق مستأجر و موجر',
-        content: 'در این مقاله به بررسی حقوق قانونی مستأجر و موجر می‌پردازیم. طبق قانون روابط موجر و مستأجر مصوب ۱۳۷۶، هر دو طرف تعهدات خاصی دارند...',
-        type: 'ARTICLE',
-        tags: '["حقوق مدنی", "مستأجر", "موجر"]',
-        likes: 45,
-      },
-      {
-        authorId: lawyer2.id,
-        title: 'آشنایی با جرم کلاهبرداری و مجازات آن',
-        content: 'کلاهبرداری یکی از جرایم مهم علیه اموال و مالیت اشخاص است. طبق ماده ۱ قانون تشدید مجازات مرتکبین ارتشاء و اختلاس و کلاهبرداری...',
-        type: 'KNOWLEDGE',
-        tags: '["کیفری", "کلاهبرداری", "قانون"]',
-        likes: 32,
-      },
-      {
-        authorId: lawyer3.id,
-        content: 'آیا شرکت شما نیاز به بازبینی قراردادهای تجاری دارد؟ با توجه به تغییرات اخیر در قوانین تجارت، پیشنهاد می‌کنم قراردادهای فعلی خود را بررسی کنید.',
-        type: 'DISCUSSION',
-        tags: '["تجاری", "قرارداد"]',
-        likes: 18,
-      },
-      {
-        authorId: admin.id,
-        title: 'اطلاعیه: سیستم جدید مدیریت پرونده‌ها',
-        content: 'با افتخار اعلام می‌کنیم سیستم جدید مدیریت پرونده‌های LegalHub راه‌اندازی شده است. این سیستم امکانات جدیدی از جمله...',
-        type: 'ANNOUNCEMENT',
-        tags: '["سیستم", "آپدیت"]',
-        isPinned: true,
-        likes: 28,
-      },
-      {
-        authorId: intern1.id,
-        title: 'سؤال: تفاوت دعوای حقوقی و کیفری چیست؟',
-        content: 'به عنوان دانشجوی حقوق، می‌خواهم بدانم تفاوت اصلی بین دعوای حقوقی و کیفری چیست و در چه شرایطی باید هر کدام را مطرح کرد؟',
-        type: 'QUESTION',
-        tags: '["حقوق", "کیفری", "آموزش"]',
-        likes: 12,
-      },
+    await Promise.all([
+      db.post.create({
+        data: {
+          authorId: lawyer1.id,
+          title: 'راهنمای حقوقی: حقوق مستأجر و موجر',
+          content: 'در این مقاله به بررسی حقوق قانونی مستأجر و موجر می‌پردازیم. طبق قانون روابط موجر و مستأجر مصوب ۱۳۷۶، هر دو طرف تعهدات خاصی دارند...',
+          type: 'ARTICLE',
+          tags: '["حقوق مدنی", "مستأجر", "موجر"]',
+          likes: 45,
+        },
+      }),
+      db.post.create({
+        data: {
+          authorId: lawyer2.id,
+          title: 'آشنایی با جرم کلاهبرداری و مجازات آن',
+          content: 'کلاهبرداری یکی از جرایم مهم علیه اموال و مالیت اشخاص است. طبق ماده ۱ قانون تشدید مجازات مرتکبین ارتشاء و اختلاس و کلاهبرداری...',
+          type: 'KNOWLEDGE',
+          tags: '["کیفری", "کلاهبرداری", "قانون"]',
+          likes: 32,
+        },
+      }),
+      db.post.create({
+        data: {
+          authorId: lawyer3.id,
+          content: 'آیا شرکت شما نیاز به بازبینی قراردادهای تجاری دارد؟ با توجه به تغییرات اخیر در قوانین تجارت، پیشنهاد می‌کنم قراردادهای فعلی خود را بررسی کنید.',
+          type: 'DISCUSSION',
+          tags: '["تجاری", "قرارداد"]',
+          likes: 18,
+        },
+      }),
+      db.post.create({
+        data: {
+          authorId: admin.id,
+          title: 'اطلاعیه: سیستم جدید مدیریت پرونده‌ها',
+          content: 'با افتخار اعلام می‌کنیم سیستم جدید مدیریت پرونده‌های LegalHub راه‌اندازی شده است. این سیستم امکانات جدیدی از جمله...',
+          type: 'ANNOUNCEMENT',
+          tags: '["سیستم", "آپدیت"]',
+          isPinned: true,
+          likes: 28,
+        },
+      }),
+      db.post.create({
+        data: {
+          authorId: intern1.id,
+          title: 'سؤال: تفاوت دعوای حقوقی و کیفری چیست؟',
+          content: 'به عنوان دانشجوی حقوق، می‌خواهم بدانم تفاوت اصلی بین دعوای حقوقی و کیفری چیست و در چه شرایطی باید هر کدام را مطرح کرد؟',
+          type: 'QUESTION',
+          tags: '["حقوق", "کیفری", "آموزش"]',
+          likes: 12,
+        },
+      }),
     ]);
 
     // ============ CREATE MESSAGES ============
 
-    await db.message.createMany([
-      {
-        senderId: client1.id,
-        receiverId: lawyer1.id,
-        content: 'سلام جناب آقای کریمی، وضعیت پرونده ملکی چگونه است؟',
-        type: 'TEXT',
-        isRead: true,
-        readAt: new Date('2024-07-10'),
-      },
-      {
-        senderId: lawyer1.id,
-        receiverId: client1.id,
-        content: 'سلام خانم جعفری، پرونده در حال بررسی است. لایحه دفاعیه در حال آماده‌سازی می‌باشد و تا پیش از جلسه دادگاه تکمیل خواهد شد.',
-        type: 'TEXT',
-        isRead: true,
-        readAt: new Date('2024-07-10'),
-      },
-      {
-        senderId: client2.id,
-        receiverId: lawyer2.id,
-        content: 'آیا امکان ملاقات حضوری قبل از جلسه بعدی دادگاه وجود دارد؟',
-        type: 'TEXT',
-        isRead: false,
-      },
-      {
-        senderId: lawyer3.id,
-        receiverId: client3.id,
-        content: 'قرارداد اولیه آماده شد. لطفاً بخش مربوط به arbitration را بررسی کنید.',
-        type: 'TEXT',
-        isRead: false,
-      },
-      {
-        senderId: manager.id,
-        receiverId: lawyer1.id,
-        content: 'لطفاً گزارش ماهانه پرونده‌های خود را تا پایان هفته ارسال کنید.',
-        type: 'TEXT',
-        isRead: true,
-        readAt: new Date('2024-07-08'),
-      },
+    await Promise.all([
+      db.message.create({
+        data: {
+          senderId: client1.id,
+          receiverId: lawyer1.id,
+          content: 'سلام جناب آقای کریمی، وضعیت پرونده ملکی چگونه است؟',
+          type: 'TEXT',
+          isRead: true,
+          readAt: new Date('2024-07-10'),
+        },
+      }),
+      db.message.create({
+        data: {
+          senderId: lawyer1.id,
+          receiverId: client1.id,
+          content: 'سلام خانم جعفری، پرونده در حال بررسی است. لایحه دفاعیه در حال آماده‌سازی می‌باشد و تا پیش از جلسه دادگاه تکمیل خواهد شد.',
+          type: 'TEXT',
+          isRead: true,
+          readAt: new Date('2024-07-10'),
+        },
+      }),
+      db.message.create({
+        data: {
+          senderId: client2.id,
+          receiverId: lawyer2.id,
+          content: 'آیا امکان ملاقات حضوری قبل از جلسه بعدی دادگاه وجود دارد؟',
+          type: 'TEXT',
+          isRead: false,
+        },
+      }),
+      db.message.create({
+        data: {
+          senderId: lawyer3.id,
+          receiverId: client3.id,
+          content: 'قرارداد اولیه آماده شد. لطفاً بخش مربوط به arbitration را بررسی کنید.',
+          type: 'TEXT',
+          isRead: false,
+        },
+      }),
+      db.message.create({
+        data: {
+          senderId: manager.id,
+          receiverId: lawyer1.id,
+          content: 'لطفاً گزارش ماهانه پرونده‌های خود را تا پایان هفته ارسال کنید.',
+          type: 'TEXT',
+          isRead: true,
+          readAt: new Date('2024-07-08'),
+        },
+      }),
     ]);
 
     // ============ CREATE LEADS ============
 
-    await db.lead.createMany([
-      {
-        assignedToId: lawyer1.id,
-        name: 'شرکت ساختمانی آسمان',
-        email: 'info@aseman-co.ir',
-        phone: '02188776655',
-        source: 'وبسایت',
-        status: 'QUALIFIED',
-        notes: 'نیاز به مشاوره حقوقی در پروژه ساختمانی بزرگ',
-        value: 200000000,
-      },
-      {
-        assignedToId: lawyer2.id,
-        name: 'خانم پرمهر',
-        email: 'parmehr@email.com',
-        phone: '09351234567',
-        source: 'ارجاع',
-        status: 'NEW',
-        notes: 'مشکلات حقوقی در زمینه ارث',
-      },
-      {
-        assignedToId: lawyer3.id,
-        name: 'هلدینگ سرمایه‌گذاری نور',
-        email: 'contact@noor-holding.com',
-        phone: '02122334455',
-        source: 'لینکدین',
-        status: 'CONTACTED',
-        notes: 'نیاز به مشاوره حقوق تجارت بین‌الملل',
-        value: 500000000,
-      },
-      {
-        assignedToId: lawyer1.id,
-        name: 'آقای رستمی',
-        email: null,
-        phone: '09191112233',
-        source: 'تلفنی',
-        status: 'NEW',
-        notes: 'دعوی ملکی در شهرستان',
-      },
+    await Promise.all([
+      db.lead.create({
+        data: {
+          assignedToId: lawyer1.id,
+          name: 'شرکت ساختمانی آسمان',
+          email: 'info@aseman-co.ir',
+          phone: '02188776655',
+          source: 'وبسایت',
+          status: 'QUALIFIED',
+          notes: 'نیاز به مشاوره حقوقی در پروژه ساختمانی بزرگ',
+          value: 200000000,
+        },
+      }),
+      db.lead.create({
+        data: {
+          assignedToId: lawyer2.id,
+          name: 'خانم پرمهر',
+          email: 'parmehr@email.com',
+          phone: '09351234567',
+          source: 'ارجاع',
+          status: 'NEW',
+          notes: 'مشکلات حقوقی در زمینه ارث',
+        },
+      }),
+      db.lead.create({
+        data: {
+          assignedToId: lawyer3.id,
+          name: 'هلدینگ سرمایه‌گذاری نور',
+          email: 'contact@noor-holding.com',
+          phone: '02122334455',
+          source: 'لینکدین',
+          status: 'CONTACTED',
+          notes: 'نیاز به مشاوره حقوق تجارت بین‌الملل',
+          value: 500000000,
+        },
+      }),
+      db.lead.create({
+        data: {
+          assignedToId: lawyer1.id,
+          name: 'آقای رستمی',
+          email: null,
+          phone: '09191112233',
+          source: 'تلفنی',
+          status: 'NEW',
+          notes: 'دعوی ملکی در شهرستان',
+        },
+      }),
     ]);
 
     // ============ CREATE CALENDAR EVENTS ============
 
-    await db.calendarEvent.createMany([
-      {
-        userId: lawyer1.id,
-        title: 'جلسه دادگاه - پرونده ملکی',
-        description: 'شعبه ۱۲ دادگاه حقوقی تهران',
-        date: new Date('2024-08-10'),
-        startTime: '09:00',
-        endTime: '12:00',
-        type: 'HEARING',
-        color: '#ef4444',
-      },
-      {
-        userId: lawyer2.id,
-        title: 'جلسه دادگاه - پرونده کیفری',
-        description: 'شعبه ۵ دادگاه کیفری تهران',
-        date: new Date('2024-07-25'),
-        startTime: '10:00',
-        endTime: '13:00',
-        type: 'HEARING',
-        color: '#ef4444',
-      },
-      {
-        userId: manager.id,
-        title: 'جلسه هفتگی مدیریت',
-        description: 'بررسی وضعیت پرونده‌ها و منابع انسانی',
-        date: new Date('2024-07-15'),
-        startTime: '08:30',
-        endTime: '10:00',
-        type: 'MEETING',
-        color: '#3b82f6',
-      },
-      {
-        userId: lawyer3.id,
-        title: 'مهلت ارسال قرارداد',
-        description: 'مهلت ارسال نسخه نهایی قرارداد به شرکای خارجی',
-        date: new Date('2024-07-30'),
-        type: 'DEADLINE',
-        color: '#f59e0b',
-      },
-      {
-        userId: accountant.id,
-        title: 'ارسال گزارش مالی ماهانه',
-        description: 'تهیه و ارسال گزارش مالی تیرماه',
-        date: new Date('2024-07-31'),
-        type: 'TASK',
-        color: '#10b981',
-      },
+    await Promise.all([
+      db.calendarEvent.create({
+        data: {
+          userId: lawyer1.id,
+          title: 'جلسه دادگاه - پرونده ملکی',
+          description: 'شعبه ۱۲ دادگاه حقوقی تهران',
+          date: new Date('2024-08-10'),
+          startTime: '09:00',
+          endTime: '12:00',
+          type: 'HEARING',
+          color: '#ef4444',
+        },
+      }),
+      db.calendarEvent.create({
+        data: {
+          userId: lawyer2.id,
+          title: 'جلسه دادگاه - پرونده کیفری',
+          description: 'شعبه ۵ دادگاه کیفری تهران',
+          date: new Date('2024-07-25'),
+          startTime: '10:00',
+          endTime: '13:00',
+          type: 'HEARING',
+          color: '#ef4444',
+        },
+      }),
+      db.calendarEvent.create({
+        data: {
+          userId: manager.id,
+          title: 'جلسه هفتگی مدیریت',
+          description: 'بررسی وضعیت پرونده‌ها و منابع انسانی',
+          date: new Date('2024-07-15'),
+          startTime: '08:30',
+          endTime: '10:00',
+          type: 'MEETING',
+          color: '#3b82f6',
+        },
+      }),
+      db.calendarEvent.create({
+        data: {
+          userId: lawyer3.id,
+          title: 'مهلت ارسال قرارداد',
+          description: 'مهلت ارسال نسخه نهایی قرارداد به شرکای خارجی',
+          date: new Date('2024-07-30'),
+          type: 'DEADLINE',
+          color: '#f59e0b',
+        },
+      }),
+      db.calendarEvent.create({
+        data: {
+          userId: accountant.id,
+          title: 'ارسال گزارش مالی ماهانه',
+          description: 'تهیه و ارسال گزارش مالی تیرماه',
+          date: new Date('2024-07-31'),
+          type: 'TASK',
+          color: '#10b981',
+        },
+      }),
     ]);
 
     // ============ CREATE TIME ENTRIES ============
 
-    await db.timeEntry.createMany([
-      {
-        userId: lawyer1.id,
-        caseId: case1.id,
-        date: new Date('2024-07-08'),
-        hours: 3.5,
-        description: 'بررسی مدارک و تهیه پیش‌نویس لایحه دفاعیه',
-        isBilled: false,
-      },
-      {
-        userId: lawyer1.id,
-        caseId: case1.id,
-        date: new Date('2024-07-09'),
-        hours: 4,
-        description: 'جلسه با موکل و بررسی جزئیات پرونده',
-        isBilled: false,
-      },
-      {
-        userId: lawyer2.id,
-        caseId: case2.id,
-        date: new Date('2024-07-07'),
-        hours: 5,
-        description: 'بررسی شواهد و مصاحبه با شاهدان',
-        isBilled: false,
-      },
-      {
-        userId: lawyer2.id,
-        caseId: case2.id,
-        date: new Date('2024-07-10'),
-        hours: 2.5,
-        description: 'مشاوره با کارشناس حقوقی',
-        isBilled: false,
-      },
-      {
-        userId: lawyer3.id,
-        caseId: case3.id,
-        date: new Date('2024-07-11'),
-        hours: 6,
-        description: 'بررسی قوانین بین‌المللی و تنظیم قرارداد',
-        isBilled: false,
-      },
-      {
-        userId: intern1.id,
-        caseId: case1.id,
-        date: new Date('2024-07-09'),
-        hours: 2,
-        description: 'جستجوی رویه قضایی و تهیه خلاصه',
-        isBilled: false,
-      },
-      {
-        userId: intern2.id,
-        caseId: case2.id,
-        date: new Date('2024-07-10'),
-        hours: 3,
-        description: 'طبقه‌بندی و بایگانی مدارک',
-        isBilled: false,
-      },
+    await Promise.all([
+      db.timeEntry.create({
+        data: {
+          userId: lawyer1.id,
+          caseId: case1.id,
+          date: new Date('2024-07-08'),
+          hours: 3.5,
+          description: 'بررسی مدارک و تهیه پیش‌نویس لایحه دفاعیه',
+          isBilled: false,
+        },
+      }),
+      db.timeEntry.create({
+        data: {
+          userId: lawyer1.id,
+          caseId: case1.id,
+          date: new Date('2024-07-09'),
+          hours: 4,
+          description: 'جلسه با موکل و بررسی جزئیات پرونده',
+          isBilled: false,
+        },
+      }),
+      db.timeEntry.create({
+        data: {
+          userId: lawyer2.id,
+          caseId: case2.id,
+          date: new Date('2024-07-07'),
+          hours: 5,
+          description: 'بررسی شواهد و مصاحبه با شاهدان',
+          isBilled: false,
+        },
+      }),
+      db.timeEntry.create({
+        data: {
+          userId: lawyer2.id,
+          caseId: case2.id,
+          date: new Date('2024-07-10'),
+          hours: 2.5,
+          description: 'مشاوره با کارشناس حقوقی',
+          isBilled: false,
+        },
+      }),
+      db.timeEntry.create({
+        data: {
+          userId: lawyer3.id,
+          caseId: case3.id,
+          date: new Date('2024-07-11'),
+          hours: 6,
+          description: 'بررسی قوانین بین‌المللی و تنظیم قرارداد',
+          isBilled: false,
+        },
+      }),
+      db.timeEntry.create({
+        data: {
+          userId: intern1.id,
+          caseId: case1.id,
+          date: new Date('2024-07-09'),
+          hours: 2,
+          description: 'جستجوی رویه قضایی و تهیه خلاصه',
+          isBilled: false,
+        },
+      }),
+      db.timeEntry.create({
+        data: {
+          userId: intern2.id,
+          caseId: case2.id,
+          date: new Date('2024-07-10'),
+          hours: 3,
+          description: 'طبقه‌بندی و بایگانی مدارک',
+          isBilled: false,
+        },
+      }),
     ]);
 
     // ============ CREATE DOCUMENTS ============
 
-    await db.document.createMany([
-      {
-        name: 'لایحه دفاعیه پرونده ملکی.pdf',
-        type: 'application/pdf',
-        filePath: '/uploads/documents/case1-defense.pdf',
-        fileSize: 2048000,
-        mimeType: 'application/pdf',
-        category: 'legal',
-        tags: '["ملکی", "دفاعیه"]',
-        uploadedBy: lawyer1.id,
-      },
-      {
-        name: 'قرارداد تجاری بین‌المللی.docx',
-        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        filePath: '/uploads/documents/intl-contract.docx',
-        fileSize: 1536000,
-        mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        category: 'contract',
-        tags: '["تجاری", "بین‌المللی"]',
-        uploadedBy: lawyer3.id,
-      },
-      {
-        name: 'گزارش مالی تیرماه.xlsx',
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        filePath: '/uploads/documents/financial-report-tir.xlsx',
-        fileSize: 512000,
-        mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        category: 'financial',
-        tags: '["مالی", "گزارش"]',
-        uploadedBy: accountant.id,
-      },
-      {
-        name: 'رأی دادگاه بیمه.pdf',
-        type: 'application/pdf',
-        filePath: '/uploads/documents/case5-verdict.pdf',
-        fileSize: 1024000,
-        mimeType: 'application/pdf',
-        category: 'legal',
-        tags: '["بیمه", "رأی"]',
-        uploadedBy: support.id,
-      },
+    await Promise.all([
+      db.document.create({
+        data: {
+          name: 'لایحه دفاعیه پرونده ملکی.pdf',
+          type: 'application/pdf',
+          filePath: '/uploads/documents/case1-defense.pdf',
+          fileSize: 2048000,
+          mimeType: 'application/pdf',
+          category: 'legal',
+          tags: '["ملکی", "دفاعیه"]',
+          uploadedBy: lawyer1.id,
+        },
+      }),
+      db.document.create({
+        data: {
+          name: 'قرارداد تجاری بین‌المللی.docx',
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          filePath: '/uploads/documents/intl-contract.docx',
+          fileSize: 1536000,
+          mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          category: 'contract',
+          tags: '["تجاری", "بین‌المللی"]',
+          uploadedBy: lawyer3.id,
+        },
+      }),
+      db.document.create({
+        data: {
+          name: 'گزارش مالی تیرماه.xlsx',
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          filePath: '/uploads/documents/financial-report-tir.xlsx',
+          fileSize: 512000,
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          category: 'financial',
+          tags: '["مالی", "گزارش"]',
+          uploadedBy: accountant.id,
+        },
+      }),
+      db.document.create({
+        data: {
+          name: 'رأی دادگاه بیمه.pdf',
+          type: 'application/pdf',
+          filePath: '/uploads/documents/case5-verdict.pdf',
+          fileSize: 1024000,
+          mimeType: 'application/pdf',
+          category: 'legal',
+          tags: '["بیمه", "رأی"]',
+          uploadedBy: support.id,
+        },
+      }),
     ]);
 
     // ============ CREATE COURSES ============
@@ -1038,35 +1134,41 @@ export async function POST() {
     });
 
     // Course lessons
-    await db.lesson.createMany([
-      {
-        courseId: course1.id,
-        title: 'مقدمه حقوق تجارت',
-        content: 'تعریف تجارت و تاجر...',
-        order: 1,
-        duration: 45,
-      },
-      {
-        courseId: course1.id,
-        title: 'شرکت‌های تجاری',
-        content: 'انواع شرکت‌ها در قانون تجارت...',
-        order: 2,
-        duration: 60,
-      },
-      {
-        courseId: course2.id,
-        title: 'تعریف و عناصر کلاهبرداری',
-        content: 'ماده ۱ قانون تشدید مجازات...',
-        order: 1,
-        duration: 45,
-      },
+    await Promise.all([
+      db.lesson.create({
+        data: {
+          courseId: course1.id,
+          title: 'مقدمه حقوق تجارت',
+          content: 'تعریف تجارت و تاجر...',
+          order: 1,
+          duration: 45,
+        },
+      }),
+      db.lesson.create({
+        data: {
+          courseId: course1.id,
+          title: 'شرکت‌های تجاری',
+          content: 'انواع شرکت‌ها در قانون تجارت...',
+          order: 2,
+          duration: 60,
+        },
+      }),
+      db.lesson.create({
+        data: {
+          courseId: course2.id,
+          title: 'تعریف و عناصر کلاهبرداری',
+          content: 'ماده ۱ قانون تشدید مجازات...',
+          order: 1,
+          duration: 45,
+        },
+      }),
     ]);
 
     // Enrollments
-    await db.enrollment.createMany([
-      { userId: intern1.id, courseId: course1.id, status: 'ACTIVE', progress: 35 },
-      { userId: intern2.id, courseId: course2.id, status: 'ACTIVE', progress: 60 },
-      { userId: lawyer1.id, courseId: course2.id, status: 'ACTIVE', progress: 10 },
+    await Promise.all([
+      db.enrollment.create({ data: { userId: intern1.id, courseId: course1.id, status: 'ACTIVE', progress: 35 } }),
+      db.enrollment.create({ data: { userId: intern2.id, courseId: course2.id, status: 'ACTIVE', progress: 60 } }),
+      db.enrollment.create({ data: { userId: lawyer1.id, courseId: course2.id, status: 'ACTIVE', progress: 10 } }),
     ]);
 
     // ============ CREATE SESSIONS (for easy login) ============
@@ -1086,12 +1188,12 @@ export async function POST() {
 
     // ============ CREATE SETTINGS ============
 
-    await db.setting.createMany([
-      { key: 'app_name', value: 'LegalHub - سامانه مدیریت حقوقی' },
-      { key: 'default_hourly_rate', value: '2500000' },
-      { key: 'currency', value: 'IRR' },
-      { key: 'working_hours_start', value: '08:00' },
-      { key: 'working_hours_end', value: '17:00' },
+    await Promise.all([
+      db.setting.create({ data: { key: 'app_name', value: 'LegalHub - سامانه مدیریت حقوقی' } }),
+      db.setting.create({ data: { key: 'default_hourly_rate', value: '2500000' } }),
+      db.setting.create({ data: { key: 'currency', value: 'IRR' } }),
+      db.setting.create({ data: { key: 'working_hours_start', value: '08:00' } }),
+      db.setting.create({ data: { key: 'working_hours_end', value: '17:00' } }),
     ]);
 
     return NextResponse.json({
