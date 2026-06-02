@@ -103,7 +103,7 @@ const API_ENDPOINTS = [
 export default function Home() {
   const { isAuthenticated, currentPage, token } = useAppStore();
   const [seedDone, setSeedDone] = useState(false);
-  const [seeding, setSeeding] = useState(false);
+  const [seeding, setSeeding] = useState(true);
   const [mounted, setMounted] = useState(false);
 
   // Wait for client-side hydration before reading persisted state
@@ -215,10 +215,17 @@ export default function Home() {
     return false;
   }, []);
 
-  // Validate existing session on mount
+  // Validate existing session on mount (with timeout)
   useEffect(() => {
     const validate = async () => {
       setSeeding(true);
+      // Auto-timeout after 5 seconds to prevent infinite loading
+      const timeout = setTimeout(() => {
+        if (seeding) {
+          setSeedDone(true);
+          setSeeding(false);
+        }
+      }, 5000);
       // After mount, validate existing session. If invalid, attempt auto-relogin.
       const state = useAppStore.getState();
       if (state.isAuthenticated && state.token && state.currentUser) {
@@ -240,6 +247,7 @@ export default function Home() {
           // Network error — don't clear auth, retry will happen on next load
         }
       }
+      clearTimeout(timeout);
       setSeedDone(true);
       setSeeding(false);
     };
