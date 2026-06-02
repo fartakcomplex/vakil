@@ -18,7 +18,7 @@ import {
   CheckCircle2, Bell, DollarSign, Activity, Plus, CalendarPlus,
   Send, BarChart3, ArrowUpLeft, ArrowDownRight, Gavel, Star,
   AlertTriangle, Timer, ChevronLeft, UserCheck, Shield,
-  UserCog, PieChart as PieChartIcon,
+  UserCog, PieChart as PieChartIcon, Bot, Sparkles, Lightbulb, Zap,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -219,6 +219,83 @@ export default function ManagerDashboard() {
           </motion.div>
         ))}
       </div>
+
+      {/* ===== AI SMART INSIGHTS ===== */}
+      <motion.div variants={itemVariants}>
+        <Card className="border-emerald-200/50 dark:border-emerald-800/30 bg-gradient-to-r from-emerald-50/50 via-transparent to-purple-50/50 dark:from-emerald-900/10 dark:via-transparent dark:to-purple-900/10">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Bot className="w-4 h-4 text-emerald-500" />
+                بینش‌های هوشمند AI
+                <Badge className="text-[9px] px-1.5 bg-gradient-to-l from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40 text-emerald-700 dark:text-emerald-300 border-0">
+                  <Sparkles className="w-2.5 h-2.5 ml-0.5" />هوشمند
+                </Badge>
+              </CardTitle>
+              <Button variant="ghost" size="sm" className="text-xs" onClick={() => setPage('ai-assistant')}>
+                مشاهده مرکز AI <ChevronLeft className="w-3 h-3 ml-1" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* AI Insight 1: Risk Alert */}
+              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200/50 dark:border-red-800/30 flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/40 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-red-700 dark:text-red-400">هشدار ریسک</p>
+                  <p className="text-[10px] text-red-600/80 dark:text-red-400/70 mt-0.5 leading-relaxed">{toPersianNumber(stats.overdue.length)} فاکتور سررسید گذشته وجود دارد</p>
+                  <button className="text-[9px] text-red-500 hover:text-red-600 mt-1 font-medium" onClick={() => setPage('invoices')}>بررسی →</button>
+                </div>
+              </div>
+              {/* AI Insight 2: Task Recommendation */}
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-800/30 flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
+                  <Lightbulb className="w-4 h-4 text-amber-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">پیشنهاد هوشمند</p>
+                  <p className="text-[10px] text-amber-600/80 dark:text-amber-400/70 mt-0.5 leading-relaxed">{toPersianNumber(stats.pendingTasks.length)} وظیفه فعال — اولویت‌بندی با AI</p>
+                  <button className="text-[9px] text-amber-500 hover:text-amber-600 mt-1 font-medium" onClick={() => setPage('ai-assistant')}>تحلیل با AI →</button>
+                </div>
+              </div>
+              {/* AI Insight 3: Performance */}
+              <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-200/50 dark:border-blue-800/30 flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-4 h-4 text-blue-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-blue-700 dark:text-blue-400">تحلیل عملکرد</p>
+                  <p className="text-[10px] text-blue-600/80 dark:text-blue-400/70 mt-0.5 leading-relaxed">بیشترین پرونده: {stats.lawyers.length > 0 ? stats.lawyers[0]?.firstName + ' ' + stats.lawyers[0]?.lastName : '—'}</p>
+                  <button className="text-[9px] text-blue-500 hover:text-blue-600 mt-1 font-medium" onClick={() => setPage('reports')}>گزارش کامل →</button>
+                </div>
+              </div>
+              {/* AI Insight 4: Quick AI Actions */}
+              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200/50 dark:border-emerald-800/30 flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
+                  <Zap className="w-4 h-4 text-emerald-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">دسترسی سریع AI</p>
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {[
+                      { label: 'چت حقوقی', id: 'chat' },
+                      { label: 'تحلیل قرارداد', id: 'contract' },
+                      { label: 'تنظیم لایحه', id: 'draft' },
+                    ].map((item, i) => (
+                      <button key={i} onClick={() => setPage('ai-assistant')} className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-all">
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* ===== CHARTS ROW ===== */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

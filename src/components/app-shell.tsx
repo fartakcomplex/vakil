@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useAppStore } from '@/lib/store';
 import { t } from '@/lib/persian';
 import { getInitials, getFullName } from '@/lib/utils-helpers';
+import FloatingAI from '@/components/floating-ai';
 import {
   Scale, LayoutDashboard, Briefcase, CalendarDays, FileText, ClipboardList,
   MessageSquare, Bell, Users, BookOpen, Rss, FolderOpen, BookMarked,
@@ -57,7 +58,7 @@ const NAV_ITEMS = [
   { id: 'financialAnalytics', label: 'nav.financialAnalytics', icon: DollarSign, roles: ['SUPER_ADMIN', 'COMPLEX_MANAGER', 'ACCOUNTANT'] },
   { id: 'reports', label: 'nav.reports', icon: TrendingUp, roles: ['SUPER_ADMIN', 'COMPLEX_MANAGER', 'ACCOUNTANT'] },
   { id: 'users', label: 'nav.users', icon: Users, roles: ['SUPER_ADMIN'] },
-  { id: 'ai-assistant', label: 'AI دستیار', icon: Bot },
+  { id: 'ai-assistant', label: 'مرکز هوش مصنوعی', icon: Bot },
   { id: 'settings', label: 'nav.settings', icon: Settings },
 ];
 
@@ -319,6 +320,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <p className="text-xs text-muted-foreground">© ۱۴۰۴ لِگال‌هاب - پلتفرم مدیریت حقوقی | نسخه ۱.۰.۰</p>
         </footer>
       </div>
+      {/* Floating AI Assistant */}
+      <FloatingAI />
     </div>
   );
 }
