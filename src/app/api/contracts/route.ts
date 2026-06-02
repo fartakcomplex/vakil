@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
-// GET contracts - public browsing for authenticated users
+// GET contracts - with optional categories mode
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+
+    // Mode: categories - return category tree only
+    if (searchParams.get('mode') === 'categories') {
+      const categories = await db.contractCategory.findMany({
+        orderBy: { order: 'asc' },
+        include: {
+          children: { orderBy: { order: 'asc' } },
+          _count: { select: { contracts: { where: { isPublished: true } } } },
+        },
+        where: { parentId: null },
+      });
+      return NextResponse.json({ categories });
+    }
+
     const search = searchParams.get('search') || '';
     const categoryId = searchParams.get('categoryId') || '';
     const difficulty = searchParams.get('difficulty') || '';
@@ -31,7 +45,7 @@ export async function GET(request: NextRequest) {
       where.difficulty = difficulty;
     }
 
-    const [contracts, total] = await Promise.all([
+    const [contracts, total, categories] = await Promise.all([
       db.contract.findMany({
         where,
         include: {
@@ -44,10 +58,19 @@ export async function GET(request: NextRequest) {
         take: limit,
       }),
       db.contract.count({ where }),
+      db.contractCategory.findMany({
+        where: { parentId: null },
+        orderBy: { order: 'asc' },
+        include: {
+          children: { orderBy: { order: 'asc' } },
+          _count: { select: { contracts: { where: { isPublished: true } } } },
+        },
+      }),
     ]);
 
     return NextResponse.json({
       contracts,
+      categories,
       pagination: {
         page,
         limit,

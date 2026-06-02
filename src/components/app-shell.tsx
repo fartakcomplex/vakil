@@ -18,7 +18,9 @@ import {
   Scale, LayoutDashboard, Briefcase, CalendarDays, FileText, ClipboardList,
   MessageSquare, Bell, Users, BookOpen, Rss, FolderOpen, BookMarked,
   TrendingUp, Target, Settings, Bot, Clock, Menu, Search, Sun, Moon,
-  LogOut, User, ChevronLeft, ChevronRight, X, DollarSign,
+  LogOut, User, ChevronLeft, ChevronRight, X, DollarSign, Mail, ScrollText,
+  FileSignature, ShieldCheck, Landmark, Gavel,
+  Newspaper, BarChart3, Library, IdCard, Gavel as Hammer, PenTool, GitBranch, HeartHandshake,
 } from 'lucide-react';
 
 // Navigation items
@@ -34,6 +36,20 @@ const NAV_ITEMS = [
   { id: 'clients', label: 'nav.all', icon: Users, roles: ['SUPER_ADMIN', 'COMPLEX_MANAGER', 'LAWYER'] },
   { id: 'documents', label: 'nav.documents', icon: FolderOpen },
   { id: 'contracts', label: 'nav.contracts', icon: BookMarked },
+  { id: 'letters', label: 'نامه‌های رسمی', icon: Mail },
+  { id: 'bills', label: 'لایحه‌های حقوقی', icon: ScrollText },
+  { id: 'declarations', label: 'اظهارنامه‌ها', icon: FileSignature },
+  { id: 'powerOfAttorney', label: 'وکالت‌نامه‌ها', icon: ShieldCheck },
+  { id: 'laws', label: 'قوانین و مقررات', icon: Landmark },
+  { id: 'courtRulings', label: 'آرای قضایی', icon: Gavel },
+  { id: 'articles', label: 'نشریات و مقالات', icon: Newspaper },
+  { id: 'surveys', label: 'نظرسنجی مشتریان', icon: BarChart3 },
+  { id: 'digitalLibrary', label: 'کتابخانه دیجیتال', icon: Library },
+  { id: 'licenses', label: 'مجوزها و گواهینامه‌ها', icon: IdCard },
+  { id: 'tenders', label: 'مناقصات و مزایدات', icon: Hammer },
+  { id: 'signatures', label: 'امضای الکترونیک', icon: PenTool },
+  { id: 'caseExecutions', label: 'مدیریت اجرایی', icon: GitBranch },
+  { id: 'proBono', label: 'وکالت معاضدتی', icon: HeartHandshake },
   { id: 'courses', label: 'nav.courses', icon: BookOpen },
   { id: 'calendar', label: 'nav.calendar', icon: CalendarDays },
   { id: 'timeTracking', label: 'nav.timeTracking', icon: Clock },
@@ -75,7 +91,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   const grouped = [
     { label: 'اصلی', items: navItemsWithRoleLabel.filter(i => ['dashboard','cases','appointments','invoices','tasks','messages','notifications','social'].includes(i.id)) },
-    { label: 'مدیریت', items: navItemsWithRoleLabel.filter(i => ['clients','documents','contracts','courses','calendar','timeTracking','leads','financialAnalytics'].includes(i.id)) },
+    { label: 'مدیریت', items: navItemsWithRoleLabel.filter(i => ['clients','documents','contracts','letters','bills','declarations','powerOfAttorney','laws','courtRulings','articles','surveys','digitalLibrary','licenses','tenders','signatures','caseExecutions','proBono','courses','calendar','timeTracking','leads','financialAnalytics'].includes(i.id)) },
     { label: 'سیستم', items: navItemsWithRoleLabel.filter(i => ['reports','users','ai-assistant','settings'].includes(i.id)) },
   ];
 
@@ -238,8 +254,50 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
+        {/* Mobile Easy Access */}
+        <div className="md:hidden border-b border-border bg-card/80 backdrop-blur-sm">
+          <div className="px-4 py-3">
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { id: 'cases', label: 'پرونده‌ها', icon: Briefcase, color: 'from-blue-500 to-blue-600' },
+                { id: 'contracts', label: 'قراردادها', icon: BookMarked, color: 'from-emerald-500 to-emerald-600' },
+                { id: 'bills', label: 'لایحه‌ها', icon: ScrollText, color: 'from-purple-500 to-purple-600' },
+                { id: 'letters', label: 'نامه‌ها', icon: Mail, color: 'from-rose-500 to-rose-600' },
+                { id: 'declarations', label: 'اظهارنامه', icon: FileSignature, color: 'from-amber-500 to-amber-600' },
+                { id: 'powerOfAttorney', label: 'وکالت‌نامه', icon: ShieldCheck, color: 'from-violet-500 to-violet-600' },
+                { id: 'laws', label: 'قوانین', icon: Landmark, color: 'from-teal-500 to-teal-600' },
+                { id: 'courtRulings', label: 'آرای قضایی', icon: Gavel, color: 'from-red-500 to-red-600' },
+                { id: 'appointments', label: 'نوبت‌دهی', icon: CalendarDays, color: 'from-cyan-500 to-cyan-600' },
+                { id: 'tasks', label: 'وظایف', icon: ClipboardList, color: 'from-orange-500 to-orange-600' },
+                { id: 'messages', label: 'پیام‌ها', icon: MessageSquare, color: 'from-indigo-500 to-indigo-600' },
+                { id: 'documents', label: 'اسناد', icon: FolderOpen, color: 'from-lime-500 to-lime-600' },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setPage(item.id)}
+                    className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all active:scale-95 ${
+                      currentPage === item.id
+                        ? 'bg-emerald-50 dark:bg-emerald-900/20 ring-2 ring-emerald-500/30'
+                        : 'hover:bg-muted/50'
+                    }`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-sm`}>
+                      <Icon className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-[10px] font-medium text-muted-foreground leading-tight text-center line-clamp-1">
+                      {item.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         {/* Content */}
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto overflow-x-hidden min-h-0">
           <AnimatePresence mode="wait">
             <motion.div key={currentPage} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
               {children}

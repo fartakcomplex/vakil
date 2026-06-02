@@ -20,12 +20,26 @@ import {
 } from 'lucide-react';
 
 // Types
+interface ContractCategoryChild {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  color: string | null;
+  order: number;
+  parentId: string | null;
+}
+
 interface ContractCategory {
   id: string;
   name: string;
   slug: string;
   icon: string | null;
   color: string | null;
+  order: number;
+  parentId: string | null;
+  children?: ContractCategoryChild[];
+  _count?: { contracts: number };
 }
 
 interface Contract {
@@ -112,36 +126,29 @@ export default function ContractsPage() {
   const [copied, setCopied] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
-  // Fetch categories
+  // Fetch categories from API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch('/api/contracts?limit=1');
+        const res = await fetch('/api/contracts?mode=categories');
         if (res.ok) {
           const data = await res.json();
-          // We'll get unique categories from the contracts
-          // For now, we'll set up some default categories
-          setCategories([
-            { id: 'cat1', name: 'استخدام و کار', slug: 'employment', icon: 'Briefcase', color: '#059669' },
-            { id: 'cat2', name: 'ملکی و املاک', slug: 'real_estate', icon: 'Home', color: '#0891b2' },
-            { id: 'cat3', name: 'تجاری', slug: 'commercial', icon: 'Building', color: '#7c3aed' },
-            { id: 'cat4', name: 'خانوادگی', slug: 'family', icon: 'Heart', color: '#e11d48' },
-            { id: 'cat5', name: 'حقوقی', slug: 'civil', icon: 'Scale', color: '#ea580c' },
-            { id: 'cat6', name: 'فناوری', slug: 'technology', icon: 'Laptop', color: '#2563eb' },
-            { id: 'cat7', name: 'بیمه', slug: 'insurance', icon: 'Shield', color: '#16a34a' },
-          ]);
+          if (data.categories && data.categories.length > 0) {
+            // Flatten: include root + children as filterable categories
+            const flat: ContractCategory[] = [];
+            for (const root of data.categories) {
+              flat.push(root);
+              if (root.children) {
+                for (const child of root.children) {
+                  flat.push(child);
+                }
+              }
+            }
+            setCategories(flat);
+          }
         }
       } catch {
-        // fallback categories
-        setCategories([
-          { id: 'cat1', name: 'استخدام و کار', slug: 'employment', icon: 'Briefcase', color: '#059669' },
-          { id: 'cat2', name: 'ملکی و املاک', slug: 'real_estate', icon: 'Home', color: '#0891b2' },
-          { id: 'cat3', name: 'تجاری', slug: 'commercial', icon: 'Building', color: '#7c3aed' },
-          { id: 'cat4', name: 'خانوادگی', slug: 'family', icon: 'Heart', color: '#e11d48' },
-          { id: 'cat5', name: 'حقوقی', slug: 'civil', icon: 'Scale', color: '#ea580c' },
-          { id: 'cat6', name: 'فناوری', slug: 'technology', icon: 'Laptop', color: '#2563eb' },
-          { id: 'cat7', name: 'بیمه', slug: 'insurance', icon: 'Shield', color: '#16a34a' },
-        ]);
+        // Will retry on next contracts fetch
       } finally {
         setCategoriesLoading(false);
       }
@@ -169,25 +176,18 @@ export default function ContractsPage() {
         setContracts(data.contracts || []);
         setPagination(data.pagination || { page: 1, limit: 20, total: 0, pages: 0 });
 
-        // Update categories from actual data
-        if (data.contracts && data.contracts.length > 0) {
-          const uniqueCategories: ContractCategory[] = [];
-          data.contracts.forEach((c: Contract) => {
-            if (!uniqueCategories.find(cat => cat.id === c.category.id)) {
-              uniqueCategories.push(c.category);
+        // Update categories from API response
+        if (data.categories && data.categories.length > 0 && categories.length === 0) {
+          const flat: ContractCategory[] = [];
+          for (const root of data.categories) {
+            flat.push(root);
+            if (root.children) {
+              for (const child of root.children) {
+                flat.push(child);
+              }
             }
-          });
-          if (uniqueCategories.length > 0) {
-            setCategories(prev => {
-              const merged = [...prev];
-              uniqueCategories.forEach(uc => {
-                if (!merged.find(c => c.id === uc.id)) {
-                  merged.push(uc);
-                }
-              });
-              return merged;
-            });
           }
+          setCategories(flat);
         }
       }
     } catch {
@@ -644,7 +644,7 @@ export default function ContractsPage() {
 
       {/* Contract Detail Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+        <DialogContent className="sm:max-w-3xl max-h-[95dvh] sm:max-h-[90dvh] overflow-y-auto sm:overflow-y-hidden flex flex-col p-0">
           {selectedContract && (
             <>
               {/* Dialog Header */}
@@ -676,7 +676,7 @@ export default function ContractsPage() {
               </DialogHeader>
 
               {/* Dialog Body */}
-              <div className="flex-1 overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-y-auto sm:overflow-hidden flex flex-col">
                 <ScrollArea className="flex-1 p-6">
                   <div className="space-y-6">
                     {/* Summary */}

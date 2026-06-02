@@ -117,7 +117,7 @@ export default function FinancialAnalyticsPage() {
       { name: 'پرداخت شده', value: paid, amount: paid * 15000000 },
       { name: '۰ تا ۳۰ روز', value: d0_30, amount: d0_30 * 25000000 },
       { name: '۳۱ تا ۶۰ روز', value: d31_60, amount: d31_60 * 35000000 },
-      { name: '۶۱ تا ۹۰ روز', value: d61_90, amount: d61_60 * 40000000 },
+      { name: '۶۱ تا ۹۰ روز', value: d61_90, amount: d61_90 * 40000000 },
       { name: 'بیش از ۹۰ روز', value: 1, amount: 50000000 },
     ];
   }, [invoices]);

@@ -28,6 +28,20 @@ import TimeTrackingPage from '@/components/pages/time-tracking-page';
 import FinancialAnalyticsPage from '@/components/pages/financial-analytics-page';
 import LandingPage from '@/components/pages/landing-page';
 import ContractsPage from '@/components/pages/contracts-page';
+import LettersPage from '@/components/pages/letters-page';
+import BillsPage from '@/components/pages/bills-page';
+import DeclarationsPage from '@/components/pages/declarations-page';
+import PowerOfAttorneyPage from '@/components/pages/power-of-attorney-page';
+import LawsPage from '@/components/pages/laws-page';
+import CourtRulingsPage from '@/components/pages/court-rulings-page';
+import ArticlesPage from '@/components/pages/articles-page';
+import SurveysPage from '@/components/pages/surveys-page';
+import DigitalLibraryPage from '@/components/pages/digital-library-page';
+import LicensesPage from '@/components/pages/licenses-page';
+import TendersPage from '@/components/pages/tenders-page';
+import SignaturesPage from '@/components/pages/signatures-page';
+import CaseExecutionsPage from '@/components/pages/case-executions-page';
+import ProBonoPage from '@/components/pages/pro-bono-page';
 
 const PAGE_MAP: Record<string, React.ComponentType> = {
   dashboard: DashboardPage,
@@ -40,6 +54,12 @@ const PAGE_MAP: Record<string, React.ComponentType> = {
   clients: ClientsPage,
   documents: DocumentsPage,
   contracts: ContractsPage,
+  letters: LettersPage,
+  bills: BillsPage,
+  declarations: DeclarationsPage,
+  powerOfAttorney: PowerOfAttorneyPage,
+  laws: LawsPage,
+  courtRulings: CourtRulingsPage,
   courses: CoursesPage,
   calendar: CalendarPage,
   reports: ReportsPage,
@@ -50,6 +70,14 @@ const PAGE_MAP: Record<string, React.ComponentType> = {
   users: UsersPage,
   timeTracking: TimeTrackingPage,
   financialAnalytics: FinancialAnalyticsPage,
+  articles: ArticlesPage,
+  surveys: SurveysPage,
+  digitalLibrary: DigitalLibraryPage,
+  licenses: LicensesPage,
+  tenders: TendersPage,
+  signatures: SignaturesPage,
+  caseExecutions: CaseExecutionsPage,
+  proBono: ProBonoPage,
 };
 
 const API_ENDPOINTS = [
@@ -75,8 +103,11 @@ export default function Home() {
   const { isAuthenticated, currentPage, token } = useAppStore();
   const [seedDone, setSeedDone] = useState(false);
   const [seeding, setSeeding] = useState(false);
-  // Hydrate from localStorage on mount
+  const [mounted, setMounted] = useState(false);
+
+  // Wait for client-side hydration before reading persisted state
   useEffect(() => {
+    setMounted(true);
     // Check if theme class matches store
     const stored = useAppStore.getState();
     if (stored.theme === 'dark') {
@@ -183,14 +214,11 @@ export default function Home() {
     return false;
   }, []);
 
-  // Seed database on first load and wait for completion
+  // Validate existing session on mount
   useEffect(() => {
-    const seed = async () => {
+    const validate = async () => {
       setSeeding(true);
-      try {
-        await fetch('/api/seed', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-      } catch { /* ignore */ }
-      // After seed, validate existing session. If invalid, attempt auto-relogin.
+      // After mount, validate existing session. If invalid, attempt auto-relogin.
       const state = useAppStore.getState();
       if (state.isAuthenticated && state.token && state.currentUser) {
         try {
@@ -214,7 +242,7 @@ export default function Home() {
       setSeedDone(true);
       setSeeding(false);
     };
-    seed();
+    validate();
   }, [tryRelogin]);
 
   // Fetch data after login AND after seed completes
@@ -223,8 +251,8 @@ export default function Home() {
     fetchAllData();
   }, [isAuthenticated, seedDone, fetchAllData]);
 
-  // Show loading splash while seeding
-  if (seeding) {
+  // Show loading splash while seeding (or waiting for hydration)
+  if (seeding || !mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-900 dark:to-slate-800">
         <div className="text-center">

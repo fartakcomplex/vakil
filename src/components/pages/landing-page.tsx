@@ -1,6 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+
+// Client-only wrapper to prevent hydration mismatches
+function ClientOnly({ children, fallback = null }: { children: React.ReactNode; fallback?: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  return mounted ? <>{children}</> : <>{fallback}</>;
+}
 import { motion, useInView, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import {
   Scale,
@@ -178,7 +185,7 @@ function FloatingIcons() {
             opacity: [0.05, 0.12, 0.05, 0.12, 0.05],
           }}
           transition={{
-            duration: 8 + Math.random() * 4,
+            duration: 8 + seededRandom(i + 500) * 4,
             delay,
             repeat: Infinity,
             ease: 'easeInOut',
@@ -192,17 +199,25 @@ function FloatingIcons() {
 }
 
 // ============ PARTICLES BACKGROUND ============
+// Deterministic pseudo-random based on index to avoid hydration mismatch
+function seededRandom(seed: number) {
+  const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
 function Particles() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const particles = useMemo(() => 
     Array.from({ length: 30 }, (_, i) => ({
       id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 3 + 1,
-      duration: Math.random() * 4 + 6,
-      delay: Math.random() * 5,
+      x: seededRandom(i) * 100,
+      y: seededRandom(i + 100) * 100,
+      size: seededRandom(i + 200) * 3 + 1,
+      duration: seededRandom(i + 300) * 4 + 6,
+      delay: seededRandom(i + 400) * 5,
     })), []
   );
+  if (!mounted) return <div className="absolute inset-0 overflow-hidden pointer-events-none" />;
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">

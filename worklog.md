@@ -1,39 +1,21 @@
 ---
 Task ID: 1
 Agent: Main Agent
-Task: Fix server stability and take screenshots of role-based dashboards
+Task: Fix mobile scrolling issues and add Easy Access mobile UI
 
 Work Log:
-- Diagnosed server instability: Next.js process keeps getting killed in sandbox environment
-- Tested multiple approaches: standalone mode, dev mode, watchdog scripts, memory limits
-- Root cause: Sandbox memory/resource limitations cause Next.js + Chrome to compete, resulting in process kills
-- Fixed Zustand store: Added currentPage to persisted state to fix dashboard routing issue
-- Fixed login action: Now resets currentPage to dashboard on login
-- Took screenshots via agent-browser (landing page, admin dashboard, manager dashboard, lawyer cartable)
-- Lawyer cartable confirmed working: shows personal cases, tasks, appointments, revenue stats
-- Admin/Manager dashboard confirmed working: shows full complex overview
-- Client dashboard exists from previous session screenshots
+- Analyzed scrolling issues across all pages: dialogs (DialogContent with max-h and overflow-hidden), mobile menu (Sheet/ScrollArea), and main content area
+- Found 15 pages with dialog scrolling problems: bills, contracts, letters, articles, laws, court-rulings, declarations, power-of-attorney, licenses, digital-library, surveys, tenders, signatures, case-executions, pro-bono
+- Fixed globals.css: Added mobile scroll CSS with dynamic viewport height (dvh), overscroll-behavior, webkit-overflow-scrolling, dialog full-screen rules
+- Fixed dialog.tsx: Added max-h-[95dvh], overflow-y-auto sm:overflow-y-hidden to DialogContent base class
+- Fixed sheet.tsx: Added overflow-hidden to SheetContent so inner ScrollArea works
+- Fixed app-shell.tsx main: Changed from overflow-auto to overflow-y-auto overflow-x-hidden min-h-0
+- Fixed all 15 page DialogContent classes: max-h-[90vh] → max-h-[95dvh] sm:max-h-[90dvh] with responsive overflow
+- Fixed bills-page.tsx and letters-page.tsx specific double-scroll issue (overflow-y-auto + ScrollArea)
+- Added Mobile Easy Access section: 4-column grid with 12 gradient icon buttons for quick navigation
+- Built and deployed successfully
 
 Stage Summary:
-- Code fix applied to src/lib/store.ts (currentPage persistence)
-- Screenshots saved to /home/z/my-project/download/
-- Server builds successfully but cannot stay running simultaneously with browser in sandbox
-- All three role-based dashboards (lawyer, manager, client) are implemented and functional
-
----
-Task ID: 1
-Agent: Main Agent
-Task: Start the LegalHub site and provide access to user
-
-Work Log:
-- Initialized fullstack-dev environment
-- System auto dev server (dev.sh) started on port 3000
-- Removed standalone output config from next.config.ts
-- Tested all API endpoints - all working correctly
-- Server is stable and managed by the system
-
-Stage Summary:
-- Server running at port 3000 via system-managed dev.sh
-- Login API verified: lawyer1@legalhub.ir / 123456 returns حسین کریمی (LAWYER role)
-- All API endpoints verified: Cases(12), Tasks(13), Appointments(12), Invoices(10), Documents(10)
-- Previous sandbox instability resolved by using fullstack-dev skill's managed dev server
+- All scrolling issues fixed across 19 files
+- Mobile Easy Access added with 12 quick-access icons
+- Server running on port 3000, HTTP 200 confirmed

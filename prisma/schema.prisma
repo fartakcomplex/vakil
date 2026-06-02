@@ -59,6 +59,14 @@ model User {
   calendarEvents      CalendarEvent[]
   leads               Lead[]
   supervisedInterns   InternProfile[]  @relation("InternSupervisor")
+  articles            LegalArticle[]    @relation("ArticleAuthor")
+  surveyResponses     SurveyResponse[]  @relation("SurveyRespondent")
+  licenses            License[]         @relation("UserLicense")
+  createdTenders       Tender[]          @relation("TenderCreator")
+  tenderBids          TenderBid[]       @relation("BidProposer")
+  signingWorkflows    SigningWorkflow[] @relation("WorkflowCreator")
+  signatures          ESignature[]      @relation("SignatureSigner")
+  proBonoCases        ProBonoCase[]     @relation("ProBonoLawyer")
 
   @@index([email])
   @@index([role])
@@ -217,6 +225,7 @@ model LegalCase {
   deadlines    CaseDeadline[]
   invoices     Invoice[]
   activities   Activity[]
+  executions  CaseExecution[]
 
   @@index([status])
   @@index([type])
@@ -761,4 +770,601 @@ model Contract {
   @@index([slug])
   @@index([difficulty])
   @@index([isPublished])
+}
+
+// ============ BILLS (LA YEHA) LIBRARY ============
+
+model BillCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int      @default(0)
+  parentId    String?
+  parent      BillCategory?  @relation("BillCategoryHierarchy", fields: [parentId], references: [id])
+  children    BillCategory[] @relation("BillCategoryHierarchy")
+  bills       Bill[]
+  createdAt   DateTime @default(now())
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model Bill {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  description     String?
+  content         String   // Full bill text (HTML)
+  summary         String?
+  categoryId      String
+  category        BillCategory @relation(fields: [categoryId], references: [id])
+  billNumber      String?  // شماره لایحه
+  billType        String   @default("NEW") // NEW, AMENDMENT, SUPPLEMENTARY
+  presentationDate String? // تاریخ ارائه
+  tags            String?  // JSON array
+  applicableLaws  String? // JSON array of applicable laws
+  difficulty      String   @default("GENERAL") // GENERAL, SPECIALIZED, ADVANCED
+  status          String   @default("DRAFT") // DRAFT, UNDER_REVIEW, APPROVED, REJECTED
+  viewCount       Int      @default(0)
+  isPublished     Boolean  @default(true)
+  version         String   @default("1.0")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([difficulty])
+  @@index([status])
+  @@index([billType])
+  @@index([isPublished])
+}
+
+// ============ OFFICIAL LETTERS LIBRARY ============
+
+model LetterCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int      @default(0)
+  parentId    String?
+  parent      LetterCategory?  @relation("LetterCategoryHierarchy", fields: [parentId], references: [id])
+  children    LetterCategory[] @relation("LetterCategoryHierarchy")
+  letters      OfficialLetter[]
+  createdAt   DateTime @default(now())
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model OfficialLetter {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  description   String?
+  content       String   // Full letter text (HTML)
+  summary       String?  // Short summary
+  categoryId    String
+  category      LetterCategory @relation(fields: [categoryId], references: [id])
+  recipientType String?  // government, court, insurance, bank, company, person, etc.
+  tags          String?  // JSON array
+  applicableLaws String? // JSON array of applicable laws
+  difficulty    String   @default("GENERAL") // GENERAL, SPECIALIZED, ADVANCED
+  viewCount     Int      @default(0)
+  isPublished   Boolean  @default(true)
+  version       String   @default("1.0")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([difficulty])
+  @@index([isPublished])
+}
+
+// ============ DECLARATIONS (ESHARNAMEH) LIBRARY ============
+
+model DeclarationCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int      @default(0)
+  parentId    String?
+  parent      DeclarationCategory?  @relation("DeclarationCategoryHierarchy", fields: [parentId], references: [id])
+  children    DeclarationCategory[] @relation("DeclarationCategoryHierarchy")
+  declarations Declaration[]
+  createdAt   DateTime @default(now())
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model Declaration {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  description   String?
+  content       String   // Full declaration text (HTML)
+  summary       String?
+  categoryId    String
+  category      DeclarationCategory @relation(fields: [categoryId], references: [id])
+  recipientType String?  // court, government, registry, person, company
+  tags          String?  // JSON array
+  applicableLaws String? // JSON array of applicable laws
+  difficulty    String   @default("GENERAL") // GENERAL, SPECIALIZED, ADVANCED
+  viewCount     Int      @default(0)
+  isPublished   Boolean  @default(true)
+  version       String   @default("1.0")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([difficulty])
+  @@index([isPublished])
+}
+
+// ============ POWER OF ATTORNEY (VEKALATNAMEH) LIBRARY ============
+
+model PowerOfAttorneyCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int      @default(0)
+  parentId    String?
+  parent      PowerOfAttorneyCategory?  @relation("PoACategoryHierarchy", fields: [parentId], references: [id])
+  children    PowerOfAttorneyCategory[] @relation("PoACategoryHierarchy")
+  powerOfAttorneys PowerOfAttorney[]
+  createdAt   DateTime @default(now())
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model PowerOfAttorney {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  description   String?
+  content       String   // Full power of attorney text (HTML)
+  summary       String?
+  categoryId    String
+  category      PowerOfAttorneyCategory @relation(fields: [categoryId], references: [id])
+  scope         String?  // general, special, judicial, administrative
+  tags          String?  // JSON array
+  applicableLaws String? // JSON array of applicable laws
+  difficulty    String   @default("GENERAL") // GENERAL, SPECIALIZED, ADVANCED
+  viewCount     Int      @default(0)
+  isPublished   Boolean  @default(true)
+  version       String   @default("1.0")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([difficulty])
+  @@index([isPublished])
+}
+
+// ============ LEGAL LAWS LIBRARY ============
+
+model LegalLawCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int      @default(0)
+  parentId    String?
+  parent      LegalLawCategory?  @relation("LegalLawCategoryHierarchy", fields: [parentId], references: [id])
+  children    LegalLawCategory[] @relation("LegalLawCategoryHierarchy")
+  laws        LegalLaw[]
+  createdAt   DateTime @default(now())
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model LegalLaw {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  description     String?
+  content         String   // Full law text (HTML)
+  summary         String?
+  categoryId      String
+  category        LegalLawCategory @relation(fields: [categoryId], references: [id])
+  lawNumber       String?  // شماره قانون
+  lawType         String   @default("LAW") // LAW, REGULATION, BYLAW, DIRECTIVE, CIRCULAR
+  approvalDate    String?  // تاریخ تصویب
+  enforcementDate String? // تاریخ اجرا
+  source          String?  // مجلس، شورای نگهبان، etc.
+  tags            String?  // JSON array
+  difficulty      String   @default("GENERAL") // GENERAL, SPECIALIZED, ADVANCED
+  viewCount       Int      @default(0)
+  isPublished     Boolean  @default(true)
+  version         String   @default("1.0")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([lawType])
+  @@index([difficulty])
+  @@index([isPublished])
+}
+
+// ============ COURT RULINGS (ARAYE QAZAYI) LIBRARY ============
+
+model CourtRulingCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int      @default(0)
+  parentId    String?
+  parent      CourtRulingCategory?  @relation("CourtRulingCategoryHierarchy", fields: [parentId], references: [id])
+  children    CourtRulingCategory[] @relation("CourtRulingCategoryHierarchy")
+  rulings      CourtRuling[]
+  createdAt   DateTime @default(now())
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model CourtRuling {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  description     String?
+  content         String   // Full ruling text (HTML)
+  summary         String?
+  categoryId      String
+  category        CourtRulingCategory @relation(fields: [categoryId], references: [id])
+  rulingNumber    String?  // شماره رأی
+  rulingBranch    String?  // شعبه
+  rulingType      String   @default("UNITY") // UNITY, PRECEDENT, REVERSAL, CONFIRMATION
+  caseType        String?  // civil, criminal, family, etc.
+  rulingDate      String?  // تاریخ صدور
+  court           String?  // دیوان عالی، etc.
+  keywords        String?  // JSON array
+  applicableLaws  String?  // JSON array of applicable laws
+  difficulty      String   @default("GENERAL") // GENERAL, SPECIALIZED, ADVANCED
+  viewCount       Int      @default(0)
+  isPublished     Boolean  @default(true)
+  version         String   @default("1.0")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([rulingType])
+  @@index([caseType])
+  @@index([difficulty])
+  @@index([isPublished])
+}
+
+// ============ LEGAL ARTICLES / JOURNALS ============
+
+model ArticleCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int      @default(0)
+  parentId    String?
+  parent      ArticleCategory?  @relation("ArticleCategoryHierarchy", fields: [parentId], references: [id])
+  children    ArticleCategory[] @relation("ArticleCategoryHierarchy")
+  articles    LegalArticle[]
+  createdAt   DateTime @default(now())
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model LegalArticle {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  description   String?
+  content       String
+  summary       String?
+  categoryId    String
+  category      ArticleCategory @relation(fields: [categoryId], references: [id])
+  authorId      String
+  author        User      @relation("ArticleAuthor", fields: [authorId], references: [id])
+  articleType   String   @default("ARTICLE") // ARTICLE, JOURNAL, ANALYSIS, OPINION, REVIEW
+  tags          String?
+  difficulty    String   @default("GENERAL")
+  viewCount     Int      @default(0)
+  likeCount     Int      @default(0)
+  isPublished   Boolean  @default(true)
+  isFeatured    Boolean  @default(false)
+  publishDate   String?
+  version       String   @default("1.0")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([authorId])
+  @@index([articleType])
+  @@index([isPublished])
+}
+
+// ============ CLIENT SURVEYS ============
+
+model Survey {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("ACTIVE") // ACTIVE, CLOSED, DRAFT
+  targetGroup String?  // ALL, CLIENTS, LAWYERS
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  questions   SurveyQuestion[]
+  responses   SurveyResponse[]
+
+  @@index([status])
+}
+
+model SurveyQuestion {
+  id        String   @id @default(cuid())
+  surveyId  String
+  question  String
+  type      String   @default("RATING") // RATING, TEXT, CHOICE, MULTICHOICE
+  options   String?  // JSON array for choice/multichoice
+  order     Int      @default(0)
+  survey    Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  @@index([surveyId])
+}
+
+model SurveyResponse {
+  id          String   @id @default(cuid())
+  surveyId    String
+  userId      String
+  answers     String   // JSON
+  rating      Float?
+  comment     String?
+  createdAt   DateTime @default(now())
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  user   User   @relation("SurveyRespondent", fields: [userId], references: [id])
+
+  @@index([surveyId])
+  @@index([userId])
+}
+
+// ============ DIGITAL LEGAL LIBRARY ============
+
+model DigitalBookCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int      @default(0)
+  parentId    String?
+  parent      DigitalBookCategory?  @relation("BookCategoryHierarchy", fields: [parentId], references: [id])
+  children    DigitalBookCategory[] @relation("BookCategoryHierarchy")
+  books       DigitalBook[]
+  createdAt   DateTime @default(now())
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model DigitalBook {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  description   String?
+  content       String?
+  author        String?
+  publisher     String?
+  isbn          String?  @unique
+  categoryId    String
+  category      DigitalBookCategory @relation(fields: [categoryId], references: [id])
+  bookType      String   @default("BOOK") // BOOK, REFERENCE, ENCYCLOPEDIA, COMMENTARY
+  language      String   @default("fa")
+  pages         Int?
+  tags          String?
+  difficulty    String   @default("GENERAL")
+  viewCount     Int      @default(0)
+  downloadCount Int     @default(0)
+  isPublished   Boolean  @default(true)
+  isPremium     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([bookType])
+  @@index([isPublished])
+}
+
+// ============ LICENSE & CERTIFICATION ============
+
+model License {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation("UserLicense", fields: [userId], references: [id])
+  licenseType     String   // LAWYER_LICENSE, SPECIALIZATION, CERTIFICATE, ACCREDITATION
+  licenseNumber   String   @unique
+  issuingBody     String?
+  issueDate       String?
+  expiryDate      String?
+  status          String   @default("ACTIVE") // ACTIVE, EXPIRED, REVOKED, PENDING_RENEWAL
+  notes           String?
+  reminderSent    Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([licenseType])
+  @@index([status])
+  @@index([expiryDate])
+}
+
+// ============ TENDERS & BIDS ============
+
+model Tender {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  organization    String?
+  tenderNumber    String?
+  tenderType      String   @default("GOVERNMENT") // GOVERNMENT, PRIVATE, INTERNATIONAL
+  budgetRange     String?  // JSON: {min, max}
+  deadline        DateTime?
+  status          String   @default("OPEN") // OPEN, CLOSED, AWARDED, CANCELLED
+  requirements    String?  // JSON
+  createdBy       String
+  creator         User     @relation("TenderCreator", fields: [createdBy], references: [id])
+  bids            TenderBid[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([tenderType])
+  @@index([deadline])
+}
+
+model TenderBid {
+  id          String   @id @default(cuid())
+  tenderId    String
+  tender      Tender   @relation(fields: [tenderId], references: [id], onDelete: Cascade)
+  proposedBy  String
+  proposer    User      @relation("BidProposer", fields: [proposedBy], references: [id])
+  amount      Float?
+  description String?
+  status      String   @default("SUBMITTED") // SUBMITTED, SHORTLISTED, ACCEPTED, REJECTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenderId])
+  @@index([proposedBy])
+  @@index([status])
+}
+
+// ============ ELECTRONIC SIGNATURES ============
+
+model SigningWorkflow {
+  id          String   @id @default(cuid())
+  title       String
+  documentType String? // contract, letter, ruling, powerOfAttorney
+  documentId  String?
+  status      String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+  createdBy   String
+  creator     User     @relation("WorkflowCreator", fields: [createdBy], references: [id])
+  signatures  ESignature[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([documentType])
+}
+
+model ESignature {
+  id          String   @id @default(cuid())
+  workflowId  String
+  workflow    SigningWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  signerId    String
+  signer      User     @relation("SignatureSigner", fields: [signerId], references: [id])
+  order       Int      @default(0)
+  status      String   @default("PENDING") // PENDING, SIGNED, REJECTED
+  signedAt    DateTime?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  @@index([workflowId])
+  @@index([signerId])
+  @@index([status])
+}
+
+// ============ CASE EXECUTION MANAGEMENT ============
+
+model CaseExecution {
+  id              String   @id @default(cuid())
+  caseId          String
+  case            LegalCase @relation(fields: [caseId], references: [id])
+  executionType   String   @default("JUDGMENT") // JUDGMENT, ATTACHMENT, FORFEITURE, EVICTION, SEIZURE
+  status          String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, SUSPENDED
+  executionNumber String?
+  court           String?
+  judge           String?
+  description     String?
+  startDate       String?
+  endDate         String?
+  totalAmount     Float?
+  collectedAmount Float    @default(0)
+  actions         ExecutionAction[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([caseId])
+  @@index([executionType])
+  @@index([status])
+}
+
+model ExecutionAction {
+  id          String   @id @default(cuid())
+  executionId String
+  execution   CaseExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  actionType  String   // filing, hearing, attachment, payment, notice
+  title       String
+  description String?
+ actionDate  String?
+  result      String?
+  amount      Float?
+  createdBy   String
+  createdAt   DateTime @default(now())
+
+  @@index([executionId])
+  @@index([actionDate])
+}
+
+// ============ PRO BONO LEGAL AID ============
+
+model ProBonoCase {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  caseType        String?  // civil, criminal, family, labor
+  applicantName   String
+  applicantPhone  String?
+  applicantEmail  String?
+  incomeLevel     String?  // LOW, VERY_LOW
+  status          String   @default("PENDING") // PENDING, ASSIGNED, IN_PROGRESS, COMPLETED, REJECTED
+  priority        String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  assignedTo      String?
+  lawyer          User?    @relation("ProBonoLawyer", fields: [assignedTo], references: [id])
+  notes           String?
+  startDate       String?
+  completedDate   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([caseType])
+  @@index([assignedTo])
+  @@index([priority])
 }
