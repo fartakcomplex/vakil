@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useCallback, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowRightLeft, LogIn, Globe } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import type { User, LegalCase, Appointment, Invoice, Payment, Task, Notification, Post, Document, Course, Message, Lead, CalendarEvent, TimeEntry } from '@/lib/types';
 import AppShell from '@/components/app-shell';
@@ -251,6 +252,51 @@ export default function Home() {
     fetchAllData();
   }, [isAuthenticated, seedDone, fetchAllData]);
 
+  // ============ MODE SWITCH BUTTON ============
+  function ModeSwitchButton() {
+    const logout = useAppStore((s) => s.logout);
+    const setPage = useAppStore((s) => s.setPage);
+    const [showTooltip, setShowTooltip] = useState(false);
+
+    const handleClick = () => {
+      if (isAuthenticated) {
+        logout();
+      } else {
+        setPage('login');
+      }
+    };
+
+    return (
+      <motion.button
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
+        onClick={handleClick}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        className={`fixed bottom-6 left-6 z-[100] flex items-center gap-2.5 px-5 py-3 rounded-2xl shadow-2xl backdrop-blur-xl border transition-all duration-300 group ${
+          isAuthenticated
+            ? 'bg-gradient-to-l from-emerald-600 to-teal-600 text-white border-emerald-400/30 shadow-emerald-600/30 hover:shadow-emerald-500/40'
+            : 'bg-gradient-to-l from-blue-600 to-indigo-600 text-white border-blue-400/30 shadow-blue-600/30 hover:shadow-blue-500/40'
+        }`}
+      >
+        <motion.div
+          animate={{ rotate: [0, 15, -15, 0] }}
+          transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: 'easeInOut' }}
+        >
+          <ArrowRightLeft className="w-5 h-5" />
+        </motion.div>
+        <span className="text-sm font-semibold whitespace-nowrap">
+          {isAuthenticated ? 'صفحه اصلی سایت' : 'ورود به پنل مدیریت'}
+        </span>
+        {isAuthenticated ? (
+          <Globe className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity" />
+        ) : (
+          <LogIn className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity" />
+        )}
+      </motion.button>
+    );
+  }
+
   // Show loading splash while seeding (or waiting for hydration)
   if (seeding || !mounted) {
     return (
@@ -268,24 +314,37 @@ export default function Home() {
   // currentPage 'dashboard' is the default - show landing page instead
   if (!isAuthenticated) {
     if (currentPage === 'dashboard' || currentPage === 'landing') {
-      return <LandingPage />;
+      return (
+        <>
+          <LandingPage />
+          <ModeSwitchButton />
+        </>
+      );
     }
     if (currentPage === 'register') {
       return <RegisterPage />;
     }
-    return <LoginPage />;
+    return (
+      <>
+        <LoginPage />
+        <ModeSwitchButton />
+      </>
+    );
   }
 
   // Authenticated: show AppShell with the correct page
   const PageComponent = PAGE_MAP[currentPage];
 
   return (
-    <AppShell>
-      {PageComponent ? <PageComponent /> : (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">صفحه مورد نظر یافت نشد</p>
-        </div>
-      )}
-    </AppShell>
+    <>
+      <AppShell>
+        {PageComponent ? <PageComponent /> : (
+          <div className="flex items-center justify-center h-64">
+            <p className="text-muted-foreground">صفحه مورد نظر یافت نشد</p>
+          </div>
+        )}
+      </AppShell>
+      <ModeSwitchButton />
+    </>
   );
 }
