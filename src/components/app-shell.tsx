@@ -254,47 +254,56 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {/* Mobile Easy Access */}
-        <div className="md:hidden border-b border-border bg-card/80 backdrop-blur-sm">
-          <div className="px-4 py-3">
-            <div className="grid grid-cols-4 gap-2">
-              {[
-                { id: 'cases', label: 'پرونده‌ها', icon: Briefcase, color: 'from-blue-500 to-blue-600' },
-                { id: 'contracts', label: 'قراردادها', icon: BookMarked, color: 'from-emerald-500 to-emerald-600' },
-                { id: 'bills', label: 'لایحه‌ها', icon: ScrollText, color: 'from-purple-500 to-purple-600' },
-                { id: 'letters', label: 'نامه‌ها', icon: Mail, color: 'from-rose-500 to-rose-600' },
-                { id: 'declarations', label: 'اظهارنامه', icon: FileSignature, color: 'from-amber-500 to-amber-600' },
-                { id: 'powerOfAttorney', label: 'وکالت‌نامه', icon: ShieldCheck, color: 'from-violet-500 to-violet-600' },
-                { id: 'laws', label: 'قوانین', icon: Landmark, color: 'from-teal-500 to-teal-600' },
-                { id: 'courtRulings', label: 'آرای قضایی', icon: Gavel, color: 'from-red-500 to-red-600' },
-                { id: 'appointments', label: 'نوبت‌دهی', icon: CalendarDays, color: 'from-cyan-500 to-cyan-600' },
-                { id: 'tasks', label: 'وظایف', icon: ClipboardList, color: 'from-orange-500 to-orange-600' },
-                { id: 'messages', label: 'پیام‌ها', icon: MessageSquare, color: 'from-indigo-500 to-indigo-600' },
-                { id: 'documents', label: 'اسناد', icon: FolderOpen, color: 'from-lime-500 to-lime-600' },
-              ].map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setPage(item.id)}
-                    className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all active:scale-95 ${
-                      currentPage === item.id
-                        ? 'bg-emerald-50 dark:bg-emerald-900/20 ring-2 ring-emerald-500/30'
-                        : 'hover:bg-muted/50'
-                    }`}
-                  >
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-sm`}>
-                      <Icon className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="text-[10px] font-medium text-muted-foreground leading-tight text-center line-clamp-1">
-                      {item.label}
-                    </span>
-                  </button>
-                );
-              })}
+        {/* Mobile Easy Access - Only on Dashboard */}
+        {currentPage === 'dashboard' && (
+          <div className="md:hidden border-b border-border bg-card/80 backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="px-4 py-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">دسترسی سریع</span>
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] text-muted-foreground">۱۲ بخش</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { id: 'cases', label: 'پرونده‌ها', icon: Briefcase, color: 'from-blue-500 to-blue-600' },
+                  { id: 'contracts', label: 'قراردادها', icon: BookMarked, color: 'from-emerald-500 to-emerald-600' },
+                  { id: 'bills', label: 'لایحه‌ها', icon: ScrollText, color: 'from-purple-500 to-purple-600' },
+                  { id: 'letters', label: 'نامه‌ها', icon: Mail, color: 'from-rose-500 to-rose-600' },
+                  { id: 'declarations', label: 'اظهارنامه', icon: FileSignature, color: 'from-amber-500 to-amber-600' },
+                  { id: 'powerOfAttorney', label: 'وکالت‌نامه', icon: ShieldCheck, color: 'from-violet-500 to-violet-600' },
+                  { id: 'laws', label: 'قوانین', icon: Landmark, color: 'from-teal-500 to-teal-600' },
+                  { id: 'courtRulings', label: 'آرای قضایی', icon: Gavel, color: 'from-red-500 to-red-600' },
+                  { id: 'appointments', label: 'نوبت‌دهی', icon: CalendarDays, color: 'from-cyan-500 to-cyan-600' },
+                  { id: 'tasks', label: 'وظایف', icon: ClipboardList, color: 'from-orange-500 to-orange-600' },
+                  { id: 'messages', label: 'پیام‌ها', icon: MessageSquare, color: 'from-indigo-500 to-indigo-600' },
+                  { id: 'documents', label: 'اسناد', icon: FolderOpen, color: 'from-lime-500 to-lime-600' },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setPage(item.id)}
+                      className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all active:scale-95 ${
+                        currentPage === item.id
+                          ? 'bg-emerald-50 dark:bg-emerald-900/20 ring-2 ring-emerald-500/30'
+                          : 'hover:bg-muted/50'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-sm`}>
+                        <Icon className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-[10px] font-medium text-muted-foreground leading-tight text-center line-clamp-1">
+                        {item.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Content */}
         <main className="flex-1 p-4 md:p-6 overflow-y-auto overflow-x-hidden min-h-0">
