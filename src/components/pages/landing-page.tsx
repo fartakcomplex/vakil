@@ -82,6 +82,7 @@ import { useAppStore } from '@/lib/store';
 import TermsPage from './terms-page';
 import PrivacyPage from './privacy-page';
 import AboutPage from './about-page';
+import PracticeAreaPage from './practice-area-page';
 
 // ============ ANIMATION VARIANTS ============
 const fadeInUp = {
@@ -557,6 +558,10 @@ export default function LandingPage() {
 
   // Render sub-pages when active
   if (landingSubPage) {
+    if (landingSubPage.startsWith('area-')) {
+      const areaName = landingSubPage.replace('area-', '');
+      return <PracticeAreaPage areaName={areaName} onBack={() => setLandingSubPage(null)} onNavigateArea={(area) => setLandingSubPage('area-' + area)} />;
+    }
     switch (landingSubPage) {
       case 'terms': return <TermsPage onBack={() => setLandingSubPage(null)} />;
       case 'privacy': return <PrivacyPage onBack={() => setLandingSubPage(null)} />;
@@ -1035,7 +1040,7 @@ export default function LandingPage() {
                   viewport={{ once: true }}
                   variants={scaleIn}
                 >
-                  <Card className="group cursor-pointer hover:border-primary/30 hover:shadow-lg transition-all duration-300 bg-card border-border/50">
+                  <Card className="group cursor-pointer hover:border-primary/30 hover:shadow-lg transition-all duration-300 bg-card border-border/50" onClick={() => setLandingSubPage('area-' + area.title)}>
                     <CardContent className="px-4 py-3 flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
                         <area.icon className={`w-5 h-5 ${area.color}`} />
@@ -1451,7 +1456,7 @@ export default function LandingPage() {
               <ul className="space-y-2.5">
                 {practiceAreas.slice(0, 6).map((a, i) => (
                   <li key={i}>
-                    <button onClick={() => scrollToSection('lawyers')} className="text-sm text-white/50 hover:text-white transition-colors">{a.title}</button>
+                    <button onClick={() => setLandingSubPage('area-' + a.title)} className="text-sm text-white/50 hover:text-white transition-colors">{a.title}</button>
                   </li>
                 ))}
               </ul>
