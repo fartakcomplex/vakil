@@ -79,6 +79,9 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { useAppStore } from '@/lib/store';
+import TermsPage from './terms-page';
+import PrivacyPage from './privacy-page';
+import AboutPage from './about-page';
 
 // ============ ANIMATION VARIANTS ============
 const fadeInUp = {
@@ -487,6 +490,7 @@ export default function LandingPage() {
   const [formSuccess, setFormSuccess] = useState(false);
   const [selectedConsult, setSelectedConsult] = useState<number | null>(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [landingSubPage, setLandingSubPage] = useState<string | null>(null);
   const liveCount = useLiveCounter();
 
   // Parallax
@@ -550,6 +554,15 @@ export default function LandingPage() {
     setMobileMenuOpen(false);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   }, []);
+
+  // Render sub-pages when active
+  if (landingSubPage) {
+    switch (landingSubPage) {
+      case 'terms': return <TermsPage onBack={() => setLandingSubPage(null)} />;
+      case 'privacy': return <PrivacyPage onBack={() => setLandingSubPage(null)} />;
+      case 'about': return <AboutPage onBack={() => setLandingSubPage(null)} />;
+    }
+  }
 
   return (
     <div dir="rtl" className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -1404,6 +1417,9 @@ export default function LandingPage() {
               <p className="text-white/50 text-sm leading-relaxed mb-4">
                 سامانه مشاوره حقوقی آنلاین با تیم وکلای متخصص. صفر تا صد پیگیری پرونده حقوقی شما.
               </p>
+              <button onClick={() => setLandingSubPage('about')} className="text-emerald-400 text-sm hover:text-emerald-300 transition-colors mb-4 block">
+                درباره لِگال‌هاب ←
+              </button>
               <div className="flex gap-3">
                 <motion.a href="#" whileHover={{ scale: 1.1, y: -2 }} className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-colors">
                   <Instagram className="w-4 h-4" />
@@ -1471,8 +1487,8 @@ export default function LandingPage() {
               تمامی حقوق مادی و معنوی این سامانه متعلق به لِگال‌هاب می‌باشد.
             </p>
             <div className="flex items-center gap-4 text-sm text-white/40">
-              <button className="hover:text-white transition-colors">شرایط استفاده</button>
-              <button className="hover:text-white transition-colors">حریم خصوصی</button>
+              <button onClick={() => setLandingSubPage('terms')} className="hover:text-white transition-colors">شرایط استفاده</button>
+              <button onClick={() => setLandingSubPage('privacy')} className="hover:text-white transition-colors">حریم خصوصی</button>
             </div>
           </div>
         </div>
