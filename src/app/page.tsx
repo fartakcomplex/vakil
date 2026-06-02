@@ -43,6 +43,21 @@ import TendersPage from '@/components/pages/tenders-page';
 import SignaturesPage from '@/components/pages/signatures-page';
 import CaseExecutionsPage from '@/components/pages/case-executions-page';
 import ProBonoPage from '@/components/pages/pro-bono-page';
+import CasesKanbanPage from '@/components/pages/cases-kanban-page';
+import GamificationPage from '@/components/pages/gamification-page';
+import LegalDictionaryPage from '@/components/pages/legal-dictionary-page';
+import DocumentScannerPage from '@/components/pages/document-scanner-page';
+import LegalNewsPage from '@/components/pages/legal-news-page';
+import FormBuilderPage from '@/components/pages/form-builder-page';
+import CaseSimulatorPage from '@/components/pages/case-simulator-page';
+import ClientPortalPage from '@/components/pages/client-portal-page';
+import VideoCallPage from '@/components/pages/video-call-page';
+import PaymentsPage from '@/components/pages/payments-page';
+import SmsNotificationsPage from '@/components/pages/sms-notifications-page';
+import DigitalSignaturePage from '@/components/pages/digital-signature-page';
+import I18nPage from '@/components/pages/i18n-page';
+import LandingChatbot from '@/components/landing-chatbot';
+import AiVoiceAssistant from '@/components/ai-voice-assistant';
 
 const PAGE_MAP: Record<string, React.ComponentType> = {
   dashboard: DashboardPage,
@@ -79,6 +94,19 @@ const PAGE_MAP: Record<string, React.ComponentType> = {
   signatures: SignaturesPage,
   caseExecutions: CaseExecutionsPage,
   proBono: ProBonoPage,
+  casesKanban: CasesKanbanPage,
+  gamification: GamificationPage,
+  legalDictionary: LegalDictionaryPage,
+  documentScanner: DocumentScannerPage,
+  legalNews: LegalNewsPage,
+  formBuilder: FormBuilderPage,
+  caseSimulator: CaseSimulatorPage,
+  clientPortal: ClientPortalPage,
+  videoCall: VideoCallPage,
+  payments: PaymentsPage,
+  smsNotifications: SmsNotificationsPage,
+  digitalSignature: DigitalSignaturePage,
+  i18n: I18nPage,
 };
 
 const API_ENDPOINTS = [
@@ -325,6 +353,7 @@ export default function Home() {
       return (
         <>
           <LandingPage />
+          <LandingChatbot />
           <ModeSwitchButton />
         </>
       );
@@ -335,6 +364,7 @@ export default function Home() {
     return (
       <>
         <LoginPage />
+        <LandingChatbot />
         <ModeSwitchButton />
       </>
     );
@@ -352,6 +382,7 @@ export default function Home() {
           </div>
         )}
       </AppShell>
+      <AiVoiceAssistant />
       <ModeSwitchButton />
     </>
   );

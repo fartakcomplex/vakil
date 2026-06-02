@@ -22,6 +22,8 @@ import {
   LogOut, User, ChevronLeft, ChevronRight, X, DollarSign, Mail, ScrollText,
   FileSignature, ShieldCheck, Landmark, Gavel,
   Newspaper, BarChart3, Library, IdCard, Gavel as Hammer, PenTool, GitBranch, HeartHandshake,
+  Kanban, Trophy, BookType, Camera, Video, CreditCard, MessageSquareText, Fingerprint, Globe,
+  FormInput, BrainCircuit, Newspaper as NewspaperText,
 } from 'lucide-react';
 
 // Navigation items
@@ -58,7 +60,20 @@ const NAV_ITEMS = [
   { id: 'financialAnalytics', label: 'nav.financialAnalytics', icon: DollarSign, roles: ['SUPER_ADMIN', 'COMPLEX_MANAGER', 'ACCOUNTANT'] },
   { id: 'reports', label: 'nav.reports', icon: TrendingUp, roles: ['SUPER_ADMIN', 'COMPLEX_MANAGER', 'ACCOUNTANT'] },
   { id: 'users', label: 'nav.users', icon: Users, roles: ['SUPER_ADMIN'] },
+  { id: 'casesKanban', label: 'کانبان پرونده‌ها', icon: Kanban },
+  { id: 'gamification', label: 'گیمیفیکیشن', icon: Trophy },
+  { id: 'legalDictionary', label: 'دیکشنری حقوقی', icon: BookType },
+  { id: 'documentScanner', label: 'اسکنر سند AI', icon: Camera },
+  { id: 'legalNews', label: 'اخبار حقوقی', icon: NewspaperText },
+  { id: 'formBuilder', label: 'فرم‌ساز هوشمند', icon: FormInput },
+  { id: 'caseSimulator', label: 'شبیه‌ساز پرونده', icon: BrainCircuit },
+  { id: 'clientPortal', label: 'پورتال موکل', icon: Users },
+  { id: 'videoCall', label: 'مشاوره تصویری', icon: Video },
+  { id: 'payments', label: 'پرداخت آنلاین', icon: CreditCard },
+  { id: 'smsNotifications', label: 'پیامک و اعلان', icon: MessageSquareText },
+  { id: 'digitalSignature', label: 'امضای دیجیتال', icon: Fingerprint },
   { id: 'ai-assistant', label: 'مرکز هوش مصنوعی', icon: Bot },
+  { id: 'i18n', label: 'تنظیمات زبان', icon: Globe },
   { id: 'settings', label: 'nav.settings', icon: Settings },
 ];
 
@@ -91,9 +106,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const grouped = [
-    { label: 'اصلی', items: navItemsWithRoleLabel.filter(i => ['dashboard','cases','appointments','invoices','tasks','messages','notifications','social'].includes(i.id)) },
+    { label: 'اصلی', items: navItemsWithRoleLabel.filter(i => ['dashboard','cases','casesKanban','appointments','invoices','tasks','messages','notifications','social'].includes(i.id)) },
     { label: 'مدیریت', items: navItemsWithRoleLabel.filter(i => ['clients','documents','contracts','letters','bills','declarations','powerOfAttorney','laws','courtRulings','articles','surveys','digitalLibrary','licenses','tenders','signatures','caseExecutions','proBono','courses','calendar','timeTracking','leads','financialAnalytics'].includes(i.id)) },
-    { label: 'سیستم', items: navItemsWithRoleLabel.filter(i => ['reports','users','ai-assistant','settings'].includes(i.id)) },
+    { label: 'هوشمند', items: navItemsWithRoleLabel.filter(i => ['ai-assistant','gamification','legalDictionary','documentScanner','legalNews','formBuilder','caseSimulator','clientPortal','videoCall','payments','smsNotifications','digitalSignature','i18n'].includes(i.id)) },
+    { label: 'سیستم', items: navItemsWithRoleLabel.filter(i => ['reports','users','settings'].includes(i.id)) },
   ];
 
   return (
@@ -317,7 +333,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Footer */}
         <footer className="border-t border-border py-3 px-4 text-center">
-          <p className="text-xs text-muted-foreground">© ۱۴۰۴ لِگال‌هاب - پلتفرم مدیریت حقوقی | نسخه ۱.۰.۰</p>
+          <p className="text-xs text-muted-foreground">© ۱۴۰۴ لِگال‌هاب - پلتفرم مدیریت حقوقی | نسخه ۲.۰.۰</p>
         </footer>
       </div>
       {/* Floating AI Assistant */}
